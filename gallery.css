@@ -1,0 +1,447 @@
+.navbar-nav .nav-link {
+  font-size: 14px !important;
+  font-family: 'Roboto', Arial, sans-serif !important;
+  color: #fff !important;
+  text-transform: uppercase !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.5px !important;
+}
+
+/* Navbar background color set to black for consistency */
+.navbar.second-header,
+#primary-header.navbar,
+.header-top.first-header {
+  background-color: #000 !important;
+}
+:root {
+  --body-font: "Roboto", sans-serif;
+}
+
+body {
+/* Footer styles and functionalities */
+#footer.bg-primary {
+	background-color: #d81010 !important;
+	color: #fff;
+	padding-top: 3rem;
+	padding-bottom: 2rem;
+}
+
+
+.footer-menu {
+	margin-bottom: 2rem;
+	background-color: #d81010;
+}
+.footer-menu h5,
+.footer-menu h6 {
+	color: #fff;
+	font-weight: 600;
+	margin-bottom: 1rem;
+}
+.footer-menu ul.menu-list {
+	padding-left: 0;
+}
+.footer-menu ul.menu-list li {
+	margin-bottom: 0.5rem;
+}
+.footer-menu ul.menu-list a {
+	color: #fff;
+	text-decoration: none;
+	font-weight: 300;
+	transition: color 0.2s;
+  text-transform: capitalize;
+}
+.footer-menu ul.menu-list a:hover {
+	color: #ff0000;
+	text-decoration: underline;
+}
+
+.social-links {
+	margin-top: 1rem;
+}
+.social-links a {
+	color: #fff;
+	margin-right: 0.5rem;
+	transition: color 0.2s;
+}
+.social-links a:hover {
+	color: #ff0000;
+}
+.footer-bottom {
+	border-top: 1px solid rgba(255,255,255,0.2);
+	margin-top: 2rem;
+	padding-top: 1rem;
+	font-size: 1rem;
+	color: #fff;
+}
+.footer-bottom p {
+	margin-bottom: 0;
+}
+@media (max-width: 768px) {
+	.footer-menu {
+		text-align: center;
+	}
+	.footer-menu .logo {
+		margin-left: auto;
+		margin-right: auto;
+	}
+
+  .navbar-nav .nav-link {
+		font-size: 21px !important;
+		font-family: 'Roboto', Arial, sans-serif !important;
+		color: #fff !important;
+		text-transform: uppercase !important;
+		font-weight: 500 !important;
+		letter-spacing: 0.5px !important;
+	}
+}
+
+.navbar-nav .nav-link {
+  color: #fff !important;
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  font-family: 'Roboto', Arial, sans-serif;
+}
+.navbar-nav .nav-link.active,
+.navbar-nav .nav-link:hover {
+  color: #ff0000 !important;
+}
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: 0.3s ease-in-out;
+  text-transform: uppercase;
+  color: white;
+  font-family: "Roboto", sans-serif;
+}
+
+a:hover {
+  color: var(--tertiary-color);
+}
+
+.text-light {
+  color: var(--light-color) !important;
+}
+
+.text-primary {
+  color: var(--primary-color) !important;
+}
+
+header {
+  background-color: #636161;
+}
+
+/* Gallery Page Styles */
+.gallery-section {
+  padding: 40px 0;
+  background: #f9f9f9;
+  text-align: center;
+}
+/* Unique line styling for .gallery-section h2 */
+.gallery-section h2 {
+  position: relative;
+  display: inline-block;
+  font-size: 2.2rem;
+  color: #7e0808;
+  font-weight: 700;
+  letter-spacing: 2px;
+  padding-bottom: 18px;
+  margin-bottom: 32px;
+  background: linear-gradient(90deg, #7e0808 60%, #ff0000 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ...existing code... */
+.gallery-section h2::after {
+  content: "";
+  display: block;
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #7e0808 60%, #ff0000 100%);
+  border-radius: 2px;
+  box-shadow: 0 2px 8px rgba(26,8,126,0.15);
+  animation: h2line-grow 1s forwards;
+}
+
+@keyframes h2line-grow {
+  from {
+    width: 0;
+  }
+  to {
+    width: 80px;
+  }
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+/* ...existing code... */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px; /* adjust spacing as needed */
+}
+.gallery-grid video {
+  width: 200px;
+}
+.gallery-grid figure {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  overflow: hidden;
+}
+.gallery-grid img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 10px 10px 0 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: transform 0.3s;
+}
+.gallery-grid img:hover {
+  transform: scale(1.05);
+}
+.gallery-grid figcaption {
+  padding: 8px 0;
+  font-size: 1rem;
+  color: #555;
+  background: #f3f3f3;
+  width: 100%;
+  text-align: center;
+}
+.back-button {
+  display: inline-block;
+  margin: 30px auto 0 auto;
+  padding: 10px 24px;
+  background: #ff0000;
+  color: #fff;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+.back-button:hover {
+  background: #b30000;
+}
+
+.btn-close.btn-close-black {
+  filter: invert(1) brightness(2);
+}
+
+.gallery-header {
+	text-align: center;
+	background: linear-gradient(90deg, #660000 60%, #a50000 100%);
+	color: #fff;
+	padding: 5px 5px 5px 5px;
+	position: relative;
+  margin-top: 90px;
+}
+
+.gallery-header h1{
+  font-size: 30px;
+}
+
+@media only screen and (max-width: 610px) {
+  #primary-header.hidden {
+    transform: translateY(-105%);
+  }
+  /* Gallery Page Styles */
+.gallery-section {
+  margin-top: 10px;
+  padding: 40px 0;
+  background: #f9f9f9;
+  text-align: center;
+}
+#bdNavbar{
+  background-color: black;
+}
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  max-width: 610px;
+  margin: 0 auto;
+}
+
+
+
+}
+
+/* OMU RESORT styles */
+.omu-resort-section {
+  padding: 40px 0;
+}
+
+.omu-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 18px 0;
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: #910b0b;
+  /* keep heading left-aligned on desktop, centered on small screens */
+  justify-content: flex-start;
+}
+
+.omu-arrow {
+  color: #910b0b;
+  flex: 0 0 auto;
+  transform: translateX(0);
+}
+
+/* ...existing code... */
+
+.omu-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin-top: 12px;
+  align-items: stretch;
+  justify-content: space-between;
+}
+
+/* each card: flexible basis with consistent aspect ratio */
+.omu-grid figure {
+  flex: 1 1 calc(25% - 18px); /* 4 columns on wide screens */
+  max-width: calc(25% - 18px);
+  margin: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background-size: contain;
+}
+
+/* image fills the top area, keep fixed height on desktop for uniform grid */
+.omu-grid img {
+  width: 1200px;
+  height: 220px;
+  object-fit: contain;
+  display: block;
+  transition: transform .35s ease;
+}
+
+/* caption area */
+.omu-grid figcaption {
+  padding: 10px;
+  font-size: 0.95rem;
+  color: #333;
+  text-align: center;
+  background: #fafafa;
+  margin-top: auto;
+}
+
+/* hover polish */
+.omu-grid figure:hover { transform: translateY(-6px); box-shadow: 0 14px 36px rgba(0,0,0,0.10); }
+.omu-grid figure:hover img { transform: scale(1.03); }
+
+
+/* ...existing code... */
+
+/* Smaller screens */
+@media (max-width: 900px) {
+  .omu-heading {
+    justify-content: center;
+    font-size: 1.1rem;
+  }
+
+  .omu-grid img {
+  width: 100%;
+  height: 340px;
+  object-fit: contain;
+  display: block;
+  transition: transform .35s ease;
+  grid-template-columns: 1fr;
+}
+
+  /* ensure OMU grid shows one image per row on mobile */
+  .omu-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* ensure main gallery grid shows one item per row on mobile */
+  .gallery-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* make videos responsive on small screens */
+  .gallery-grid video {
+    width: 100%;
+    height: auto;
+  }
+}
+
+/* Large screens: taller thumbnails */
+@media (min-width: 1200px) {
+  .omu-grid img {
+    height: 220px;
+  }
+}
+
+@media only screen and (max-width: 990px) {
+  a.nav-link {
+    color: var(--dark-color);
+    font-size: 2rem;
+    padding: 1rem 0 1rem 0 !important;
+  }
+  a.nav-link:focus {
+    color: var(--dark-color);
+  }
+  a.nav-link.active,
+  .nav-link.show,
+  a.nav-link:hover {
+    color: var(--dark-color) !important;
+  }
+  #bdNavbar {
+    background-color: #000 !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .omu-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .omu-grid figure {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    object-fit: cover;
+  }
+
+  .omu-grid img {
+    width: 100%;
+    height: 300px;
+    object-fit: contain;
+    display: block;
+  }
+
+  .omu-grid figcaption {
+    text-align: center;
+    padding: 8px 10px;
+  } 
+}

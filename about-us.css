@@ -1,0 +1,336 @@
+.navbar-nav .nav-link {
+  font-size: 14px !important;
+  font-family: 'Roboto', Arial, sans-serif !important;
+  color: #fff !important;
+  text-transform: uppercase !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.5px !important;
+  padding: 60px;
+}
+
+/* Footer styles copied from gallery.css for visibility and consistency */
+#footer.bg-primary {
+	background-color: #d81010 !important;
+	color: #fff;
+	padding-top: 3rem;
+	padding-bottom: 2rem;
+}
+
+.footer-menu {
+	margin-bottom: 2rem;
+	background-color: #d81010;
+}
+.footer-menu h5,
+.footer-menu h6 {
+	color: #fff;
+	font-weight: 600;
+	margin-bottom: 1rem;
+}
+.footer-menu ul.menu-list {
+	padding-left: 0;
+}
+.footer-menu ul.menu-list li {
+	margin-bottom: 0.5rem;
+}
+.footer-menu ul.menu-list a {
+	color: #fff;
+	text-decoration: none;
+	font-weight: 300;
+	transition: color 0.2s;
+	text-transform: capitalize;
+}
+.footer-menu ul.menu-list a:hover {
+	color: #ff0000;
+	text-decoration: underline;
+}
+.social-links {
+	margin-top: 1rem;
+}
+.social-links a {
+	color: #fff;
+	margin-right: 0.5rem;
+	transition: color 0.2s;
+}
+.social-links a:hover {
+	color: #ff0000;
+}
+.footer-bottom {
+	border-top: 1px solid rgba(255,255,255,0.2);
+	margin-top: 2rem;
+	padding-top: 1rem;
+	font-size: 1rem;
+	color: #fff;
+}
+.navbar-nav .nav-link.active {
+	color: #ff0000 !important;
+}
+
+.navbar-nav .nav-link:hover{
+	color: #ff0000 !important;
+}
+
+/* NavBar Font Size and Color Customization */
+
+
+header {
+	background-color: #000;
+}
+.navbar.second-header,
+.header-top.first-header {
+	background-color: #000 !important;
+}
+body {
+	font-family: 'Roboto', Arial, sans-serif;
+	background: #fcf7f7;
+	color: #222;
+	margin: 0;
+	padding: 0;
+}
+
+.about-header {
+	text-align: center;
+	background: linear-gradient(90deg, #660000 60%, #a50000 100%);
+	color: #fff;
+	padding: 5px 5px 5px 5px;
+	position: relative;
+	margin-top: 85px;
+}
+#bdNavbar{
+  background-color: black;
+}
+.about-header img {
+    width: 140px;
+}
+.about-logo {
+	width: 90px;
+	height: auto;
+	margin-bottom: 0px;
+	margin-top: 0px;
+}
+.about-header h1 {
+	font-size: 2.5rem;
+	margin: 10px 0 5px 0;
+	font-weight: 700;
+}
+.about-tagline {
+	font-size: 1.2rem;
+	font-style: italic;
+	margin-bottom: 0;
+}
+
+.about-intro {
+	max-width: 800px;
+	margin: 40px auto 20px auto;
+	background: #fff;
+	border-radius: 10px;
+	box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+	padding: 30px 24px;
+	text-align: center;
+}
+.about-intro h2 {
+	color: #660000;
+	font-size: 2rem;
+	margin-bottom: 10px;
+}
+
+.about-mission-vision {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 40px;
+	max-width: 900px;
+	margin: 30px auto;
+}
+.about-mission-vision .mission, .about-mission-vision .vision {
+	background: #fbeaea;
+	border-radius: 8px;
+	padding: 24px 20px;
+	flex: 1 1 320px;
+	min-width: 280px;
+	box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+.about-mission-vision h3 {
+	color: #a50000;
+	margin-bottom: 8px;
+}
+
+.about-founder {
+	max-width: 900px;
+	margin: 40px auto;
+	background: #fff;
+	border-radius: 10px;
+	box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+	padding: 30px 24px;
+}
+.founder-profile {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 30px;
+}
+.founder-img {
+	width: 120px;
+	height: 170px;
+	border-radius: 50%;
+	box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+}
+.founder-message {
+	flex: 1;
+	min-width: 220px;
+}
+
+.founder-name {
+	font-weight: 600;
+	color: #660000;
+	margin-top: 8px;
+}
+.founder-name span {
+	font-weight: 400;
+	color: #555;
+	font-size: 0.95em;
+}
+
+.about-facilities {
+	max-width: 900px;
+	margin: 40px auto;
+	background: #fbeaea;
+	border-radius: 10px;
+	box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+	padding: 30px 24px;
+}
+.facilities-list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 30px;
+	justify-content: center;
+	margin-top: 20px;
+}
+.facility {
+	text-align: center;
+	flex: 1 1 180px;
+	min-width: 150px;
+}
+.facility img {
+	width: 100px;
+	height: 100px;
+	object-fit: cover;
+	border-radius: 12px;
+	box-shadow: 0 1px 4px rgba(0,0,0,0.10);
+}
+.facility p {
+	margin-top: 10px;
+	color: #a50000;
+	font-weight: 500;
+}
+
+.about-achievements {
+	max-width: 800px;
+	margin: 40px auto;
+	background: #fff;
+	border-radius: 10px;
+	box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+	padding: 30px 24px;
+}
+.about-achievements h2 {
+	color: #660300;
+	margin-bottom: 12px;
+}
+.about-achievements ul {
+	list-style: disc inside;
+	color: #a50000;
+	font-size: 1.08em;
+	margin: 0;
+	padding-left: 18px;
+}
+.about-achievements li {
+	margin-bottom: 8px;
+}
+
+.about-staff {
+	max-width: 900px;
+	margin: 40px auto;
+	background: #fbeaea;
+	border-radius: 10px;
+	box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+	padding: 30px 24px;
+}
+.staff-list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 30px;
+	justify-content: center;
+	margin-top: 20px;
+}
+.staff-member {
+	text-align: center;
+	flex: 1 1 160px;
+	min-width: 120px;
+}
+.staff-member img {
+	width: 90px;
+	height: 90px;
+	object-fit: cover;
+	border-radius: 50%;
+	box-shadow: 0 1px 4px rgba(0,0,0,0.10);
+}
+.staff-member p {
+	margin-top: 8px;
+	color: #660000;
+	font-weight: 500;
+	font-size: 1.05em;
+}
+.staff-member span {
+	display: block;
+	color: #555;
+	font-size: 0.95em;
+	font-weight: 400;
+}
+
+.about-footer {
+	text-align: center;
+	background: #660000;
+	color: #fff;
+	padding: 24px 10px 16px 10px;
+	margin-top: 40px;
+}
+.footer-logo {
+	width: 80px;
+	margin-bottom: 10px;
+}
+
+@media (max-width: 700px) {
+	.about-header h1 {
+		font-size: 1.6rem;
+	}
+	.about-intro, .about-founder, .about-facilities, .about-achievements, .about-staff {
+		padding: 18px 8px;
+	}
+	.about-mission-vision {
+		flex-direction: column;
+		gap: 18px;
+	}
+	.facilities-list, .staff-list {
+		gap: 16px;
+	}
+	.about-mission-vision .mission,
+	.about-mission-vision .vision {
+		margin-bottom: 0 !important;
+		padding-bottom: 12px;
+		height: 100px;
+	}
+	.about-mission-vision .mission,
+	.about-mission-vision .vision p{
+		font-size: 19px;
+	}
+
+	.navbar-nav .nav-link {
+		font-size: 21px !important;
+		font-family: 'Roboto', Arial, sans-serif !important;
+		color: #fff !important;
+		text-transform: uppercase !important;
+		font-weight: 500 !important;
+		letter-spacing: 0.5px !important;
+	}
+}
+
+

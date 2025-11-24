@@ -1,0 +1,262 @@
+.navbar-nav .nav-link {
+  font-size: 14px !important;
+  font-family: 'Roboto', Arial, sans-serif !important;
+  color: #fff !important;
+  text-transform: uppercase !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.5px !important;
+}
+
+/* Navbar background color set to black for consistency */
+.navbar.second-header,
+#primary-header.navbar,
+.header-top.first-header {
+  background-color: #000 !important;
+}
+/* Inner School Blog Header Styling */
+
+header#header.fixed-top {
+  z-index: 1050;
+}
+.header-top.first-header {
+  background-color: #222;
+  color: #fff;
+  font-size: 15px;
+  padding: 0.5rem 0;
+}
+.header-top .info li,
+.header-top .social-links li {
+  color: #fff;
+}
+.header-top .social-links a svg {
+  color: #fff;
+  transition: color 0.2s;
+}
+.header-top .social-links a:hover svg {
+  color: #ff0000;
+}
+
+#primary-header.navbar {
+  background: #636161;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+.navbar-brand .logo {
+  max-height: 60px;
+}
+.navbar-toggler {
+  background: transparent !important;
+  border: none !important;
+}
+.navbar-toggler svg {
+  width: 60px !important;
+  height: 60px !important;
+  color: #fff !important;
+  fill: #fff !important;
+}
+.btn-close.btn-close-black {
+  filter: invert(1) brightness(2);
+}
+.header-bottom.offcanvas {
+  background: #000;
+}
+.navbar-nav .nav-link {
+  color: #fff !important;
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  font-family: 'Roboto', Arial, sans-serif;
+  padding: 0.5rem 1rem;
+  transition: color 0.2s;
+}
+.navbar-nav .nav-link.active,
+.navbar-nav .nav-link:hover {
+  color: #ff0000 !important;
+}
+@media (max-width: 990px) {
+  #bdNavbar {
+    background-color: #000 !important;
+  }
+  .navbar-nav .nav-link {
+    font-size: 2rem;
+    padding: 1rem 0 !important;
+  }
+}
+
+/* Inner Blog Main Layout */
+.inner-blog-main {
+  max-width: 1100px;
+  margin: 0 auto;
+  margin-top: 100px;
+}
+
+.profile-img {
+    margin-left: auto;
+    margin-right: auto;
+}
+.student-profile.card {
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(26,8,126,0.09);
+}
+.student-profile .profile-img {
+  border: 4px solid #ff0000;
+}
+.student-profile h4 {
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+.student-profile ul {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+.student-profile .social-links a svg {
+  color: #636161;
+  transition: color 0.2s;
+}
+.student-profile .social-links a:hover svg {
+  color: #ff0000;
+}
+.essay.card {
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(26,8,126,0.09);
+}
+.essay h3 {
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+.essay p {
+  font-size: 1.08rem;
+  line-height: 1.7;
+  margin-bottom: 1.2rem;
+}
+@media (max-width: 991px) {
+  .inner-blog-main .row {
+    flex-direction: column;
+  }
+  .student-profile.card {
+    margin-bottom: 24px;
+  }
+}
+@media (max-width: 767px) {
+  .inner-blog-main {
+    padding: 0 8px;
+  }
+  .student-profile .profile-img {
+    width: 80px;
+    height: 80px;
+  }
+  .essay h3 {
+    font-size: 1.2rem;
+  }
+  .essay p {
+    font-size: 0.98rem;
+  }
+}
+
+/* Tips & Advice Section */
+.blog-tips-advice {
+  max-width: 1100px;
+  margin: 0 auto 40px auto;
+}
+.tips.card, .advice.card {
+  border-radius: 14px;
+  background: #f8f9fa;
+  box-shadow: 0 2px 8px rgba(26,8,126,0.07);
+}
+.tips h4 {
+  color: #ff0000;
+  font-weight: 600;
+}
+.advice h4 {
+  color: #28a745;
+  font-weight: 600;
+}
+.tips ul, .advice ul {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  margin-bottom: 0;
+}
+.tips ul li, .advice ul li {
+  margin-bottom: 0.7rem;
+}
+@media (max-width: 767px) {
+  .blog-tips-advice {
+    padding: 0 8px;
+  }
+  .tips.card, .advice.card {
+    padding: 1rem;
+  }
+  .tips ul, .advice ul {
+    font-size: 0.98rem;
+  }
+}
+
+/* Footer Styling */
+#footer.bg-primary {
+  background-color: #da0505 !important;
+  color: #fff;
+  padding-top: 3rem;
+  padding-bottom: 2rem;
+}
+.footer-menu {
+  margin-bottom: 2rem;
+  background-color: #da0505;
+}
+.footer-menu .logo {
+  max-width: 670px;
+  margin-bottom: 1.2rem;
+}
+.footer-menu h5,
+.footer-menu h6 {
+  color: #fff;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+.footer-menu ul.menu-list {
+  padding-left: 0;
+}
+.footer-menu ul.menu-list li {
+  margin-bottom: 0.5rem;
+}
+.footer-menu ul.menu-list a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 300;
+  transition: color 0.2s;
+  text-transform: capitalize;
+}
+.footer-menu ul.menu-list a:hover {
+  color: #007bff;
+  text-decoration: underline;
+}
+.social-links {
+  margin-top: 1rem;
+}
+.social-links a {
+  color: #fff;
+  margin-right: 0.5rem;
+  transition: color 0.2s;
+}
+.social-links a:hover {
+  color: #007bff;
+}
+.footer-bottom {
+  border-top: 1px solid rgba(255,255,255,0.2);
+  margin-top: 2rem;
+  padding-top: 1rem;
+  font-size: 1rem;
+  color: #fff;
+}
+.footer-bottom p {
+  margin-bottom: 0;
+}
+@media (max-width: 768px) {
+  .footer-menu {
+    text-align: center;
+  }
+  .footer-menu .logo {
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
