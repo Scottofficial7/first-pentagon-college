@@ -738,6 +738,10 @@ section#slider .main-slider-button-next.swiper-button-disabled,
     padding-bottom: 30px;
 }
 
+footer {
+  text-align: center;
+}
+
   .navbar-nav .nav-link {
 		font-size: 21px !important;
 		font-family: 'Roboto', Arial, sans-serif !important;

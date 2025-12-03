@@ -331,6 +331,9 @@ body {
 		font-weight: 500 !important;
 		letter-spacing: 0.5px !important;
 	}
+	footer {
+  text-align: center;
+}
 }
 
 
