@@ -281,6 +281,7 @@ header {
 
 
 
+
 }
 
 /* OMU RESORT styles */
@@ -384,11 +385,16 @@ header {
     grid-template-columns: 1fr;
   }
 
-  /* make videos responsive on small screens */
-  .gallery-grid video {
-    width: 100%;
-    height: auto;
-  }
+  .gallery-grid img {
+  width: 100%;
+  height: 540px;
+  object-fit: contain;
+  display: block;
+  transition: transform .35s ease;
+  grid-template-columns: 1fr;
+}
+
+  
 }
 
 /* Large screens: taller thumbnails */
@@ -439,6 +445,13 @@ header {
     object-fit: contain;
     display: block;
   }
+
+  .gallery-grid img {
+  width: 100%;
+    height: 300px;
+    object-fit: contain;
+    display: block;
+}
 
   .omu-grid figcaption {
     text-align: center;
