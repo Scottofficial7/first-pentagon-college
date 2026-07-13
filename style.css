@@ -751,3 +751,127 @@ footer {
 		letter-spacing: 0.5px !important;
 	}
 }
+
+/*----------------------------------------------*/
+/* 5. LOGIN BUTTON + PORTAL SELECT MODAL
+/*----------------------------------------------*/
+.btn-portal-login {
+  background: var(--primary-color);
+  color: #fff !important;
+  border: none;
+  font-family: var(--body-font);
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 0.55rem 1.4rem;
+  border-radius: 4px;
+  transition: background 0.2s, transform 0.15s;
+}
+.btn-portal-login:hover,
+.btn-portal-login:focus {
+  background: var(--tertiary-color);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 990px) {
+  .btn-portal-login {
+    font-size: 1.1rem;
+    padding: 0.7rem 1.6rem;
+    width: 100%;
+  }
+}
+
+.portal-modal-content {
+  border-radius: 14px;
+  border: none;
+  overflow: hidden;
+}
+.portal-modal-content .modal-header {
+  background: linear-gradient(90deg, var(--tertiary-color) 0%, var(--primary-color) 100%);
+  border-bottom: none;
+  padding: 1.25rem 1.5rem;
+}
+.portal-modal-content .modal-title {
+  color: #fff;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.portal-modal-content .btn-close {
+  filter: invert(1) brightness(2);
+}
+.portal-modal-content .modal-body {
+  padding: 1.75rem;
+}
+.portal-modal-subtitle {
+  color: var(--gray-color);
+  margin-bottom: 1.25rem;
+  font-size: 0.98rem;
+}
+
+.portal-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.portal-option {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid #ececec;
+  background: #fafafa;
+  color: var(--dark-color) !important;
+  text-decoration: none !important;
+  transition: border-color 0.2s, background 0.2s, transform 0.15s;
+}
+.portal-option:hover {
+  background: #fff;
+  border-color: var(--primary-color);
+  transform: translateX(3px);
+}
+.portal-option .portal-icon {
+  flex: 0 0 auto;
+  width: 46px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--background-color);
+  color: var(--primary-color);
+}
+.portal-option-teacher .portal-icon {
+  background: #e3ebff;
+  color: #3a4fd8;
+}
+.portal-option-admin .portal-icon {
+  background: #e6f6ec;
+  color: #1f8a4c;
+}
+.portal-option .portal-text {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+.portal-option .portal-name {
+  font-weight: 600;
+  font-size: 1.02rem;
+  color: var(--dark-color);
+}
+.portal-option .portal-desc {
+  font-size: 0.85rem;
+  color: var(--gray-color);
+  font-weight: 400;
+}
+.portal-option .portal-arrow {
+  font-size: 1.6rem;
+  color: var(--gray-color);
+  flex: 0 0 auto;
+}
+.portal-option:hover .portal-arrow {
+  color: var(--primary-color);
+}

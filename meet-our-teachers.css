@@ -1,132 +1,7 @@
-.navbar-nav .nav-link {
-  font-size: 14px !important;
-  font-family: 'Roboto', Arial, sans-serif !important;
-  color: #fff !important;
-  text-transform: uppercase !important;
-  font-weight: 500 !important;
-  letter-spacing: 0.5px !important;
-}
-
-
-/* Ensure teacher card titles are blue (override any conflicting rules) */
-.teacher-card h4 {
-  color: rgb(255, 0, 0) !important;
-  font-size: 1rem;
-  letter-spacing: 0.5px;
-}
-/* ...existing code... */
-
-/* Navbar background color set to black for consistency */
-.navbar.second-header,
-#primary-header.navbar,
-#primary-header,
-.header-top.first-header {
-  background-color: #000 !important;
-}
-/* Make menu button (navbar-toggler) visible */
-.navbar-toggler {
-  background: transparent !important;
-  border-radius: 8px;
-  border: none !important;
-}
-.navbar-toggler svg {
-  color: #fff !important;
-  fill: #fff !important;
-}
-/* Nav-bar styles from about-us.css for consistency */
-
-/* Existing styles */
-a.nav-link {
-  text-transform: uppercase;
-  color: var(--light-color);
-  font-size: 14px;
-  font-weight: 500;
-  font-family: "Roboto", Arial, sans-serif;
-}
-
-#primary-header {
-  background-color: #636161;
-}
-
-a.nav-link:focus {
-  color: var(--light-color);
-}
-
-a.nav-link.active,
-.nav-link.show,
-a.nav-link:hover {
-  color: var(--light-color) !important;
-  outline: none;
-}
-
-#primary-header .dropdown .search::after {
-  content: none;
-}
-
-#primary-header .search-dropdown .dropdown-menu {
-  width: 260px;
-}
-
-#primary-header .search-dropdown .dropdown-menu input {
-  min-width: 100%;
-}
-
-#primary-header .search-dropdown .dropdown-menu button {
-  padding: 0 12px;
-  min-height: -webkit-fill-available;
-  border-radius: 0.25rem;
-}
-
-.btn-close.btn-close-black {
-  filter: invert(1) brightness(2);
-}
-
-.navbar-nav .nav-link {
-  color: #fff !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
-.navbar-nav .nav-link.active,
-.navbar-nav .nav-link:hover {
-  color: #ff0000 !important;
-}
-
-@media only screen and (max-width: 610px) {
-  #primary-header.hidden {
-    transform: translateY(-105%);
-  }
-  #bdNavbar{
-    background-color: black;
-  }
-}
-
-@media only screen and (max-width: 990px) {
-  a.nav-link {
-    color: var(--dark-color);
-    font-size: 2rem;
-    padding: 1rem 0 1rem 0 !important;
-  }
-  a.nav-link:focus {
-    color: var(--dark-color);
-  }
-  a.nav-link.active,
-  .nav-link.show,
-  a.nav-link:hover {
-    color: var(--dark-color) !important;
-  }
-  #bdNavbar {
-    background-color: #000 !important;
-  }
-  .navbar-nav .nav-link {
-		font-size: 21px !important;
-		font-family: 'Roboto', Arial, sans-serif !important;
-		color: #fff !important;
-		text-transform: uppercase !important;
-		font-weight: 500 !important;
-		letter-spacing: 0.5px !important;
-	}
-}
+/* ==========================================================
+   Meet Our Teachers page — page-specific styles
+   (base nav/header/footer/typography now come from style.css)
+   ========================================================== */
 
 body {
   font-family: 'Roboto', Arial, sans-serif;
@@ -135,27 +10,27 @@ body {
   padding: 0;
 }
 
-.container{
-    margin-top: 150px;
+.container {
+  margin-top: 150px;
 }
-.container h1{
-    font-size: 2rem;
-    font-weight: 700;
-    margin-bottom: 1.5rem;
-    text-align: center;
+.container h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  text-align: center;
 }
 
-/* Header styles copied from gallery page for consistency */
-
+/* Header — consistent dark navbar across the site */
 #header.fixed-top {
   z-index: 1030;
 }
-
-#primary-header {
-    background-color: #222;
+#primary-header,
+.navbar.second-header,
+.header-top.first-header,
+#bdNavbar {
+  background-color: var(--dark-color) !important;
 }
 .header-top.first-header {
-  background: #111 !important;
   color: #fff;
   font-size: 15px;
 }
@@ -166,27 +41,12 @@ body {
 .header-top .social-links a svg {
   fill: #fff;
 }
-.navbar.second-header {
-  background: #222 !important;
-  box-shadow: none !important;
-}
 .navbar .navbar-brand .logo {
   max-height: 60px;
 }
-.navbar-nav .nav-link {
-  font-size: 1.1rem;
-  font-weight: 500;
-  color: #222 !important;
-  letter-spacing: 0.5px;
-  transition: color 0.2s;
-}
-.navbar-nav .nav-link.active,
-.navbar-nav .nav-link:hover {
-  color: #fdfdfd !important;
-}
 .navbar-toggler {
-  /* Remove background and force transparent for consistency */
   background: transparent !important;
+  border: none !important;
   border-radius: 8px;
 }
 .navbar-toggler svg {
@@ -196,7 +56,6 @@ body {
 .offcanvas-header .btn-close-black {
   background-color: #222;
 }
-
 .dropdown-menu {
   background: #fff;
   border-radius: 0.5rem;
@@ -205,91 +64,41 @@ body {
 #navbar-search-input {
   border-radius: 0.5rem;
 }
+.btn-close.btn-close-black {
+  filter: invert(1) brightness(2);
+}
 
-  .header-top.first-header {
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-  .navbar.second-header {
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-  .teacher-card {
-    padding: 1.5rem 1rem;
-  }
-  .teacher-img {
-    width: 90px;
-    height: 90px;
-  }
-
+/* Teacher cards */
+.teacher-card {
+  padding: 1.5rem 1rem;
+}
 .teacher-card h4 {
-  .navbar .navbar-brand .logo {
-    max-height: 40px;
-  }
-  .teacher-card h4 {
-    font-size: 1rem;
-  }
-  .teacher-card .subject {
-    font-size: 0.9rem;
-  }
-  .teacher-img {
-    width: 70px;
-    height: 70px;
-  }
-  color: #fff;
-  font-size: 1rem;
+  color: var(--primary-color) !important;
+  font-size: 1.15rem;
+  font-weight: 600;
   letter-spacing: 0.5px;
-  border-top: 4px solid #fff;
 }
-@media (max-width: 990px) {
-  .teachers-header {
-    padding: 2rem 1rem;
-  }
-  .teacher-card {
-    padding: 1.5rem 1rem;
-  }
-  .teacher-img {
-    width: 90px;
-    height: 90px;
-  }
+.teacher-card .subject {
+  font-size: 1rem;
+  color: #666;
 }
-@media (max-width: 600px) {
-  .teachers-header h1 {
-    font-size: 1.6rem;
-  }
-  .teacher-card h4 {
-    font-size: 1rem;
-  }
-  .teacher-card .subject {
-    font-size: 0.9rem;
-  }
-  .teacher-img {
-    width: 200px;
-    height: 150px;
-    margin-left: auto;
-    margin-right: auto;
-  }
+.teacher-img {
+  width: 90px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 50%;
 }
 
-/* Force all header nav links to white */
-#header .nav-link {
-  color: #fff !important;
-}
-#header .nav-link.active,
-#header .nav-link:hover {
-  color: #fdfdfd !important;
-}
-
-/* Footer styles for consistency with contact page */
+/* Footer */
 #footer.bg-primary {
-  background-color: #da0505 !important;
+  background-color: var(--primary-color) !important;
   color: #fff;
   padding-top: 3rem;
   padding-bottom: 2rem;
 }
 .footer-menu {
   margin-bottom: 2rem;
-  background-color: #da0505;
+  background-color: var(--primary-color);
 }
 .footer-menu .logo {
   max-width: 320px;
@@ -308,14 +117,47 @@ body {
   transition: color 0.2s;
 }
 .footer-menu .menu-list a:hover {
-  color: #e3ebff;
+  color: var(--secondary-color);
 }
 .footer-bottom {
   border-top: 1px solid rgba(255,255,255,0.2);
   margin-top: 2rem;
   padding-top: 1rem;
 }
+.footer-menu .social-links {
+  gap: 12px;
+}
+.footer-menu .social svg {
+  width: 32px !important;
+  height: 32px !important;
+  fill: #fff !important;
+  background: var(--tertiary-color);
+  border-radius: 50%;
+  padding: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  transition: background 0.2s, transform 0.2s;
+}
+.footer-menu .social a:hover svg {
+  background: var(--secondary-color);
+  transform: scale(1.1);
+}
+
 @media (max-width: 990px) {
+  .teachers-header {
+    padding: 2rem 1rem;
+  }
+  .teacher-card {
+    padding: 1.5rem 1rem;
+  }
+  .teacher-img {
+    width: 90px;
+    height: 90px;
+  }
+  .header-top.first-header,
+  .navbar.second-header {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
   #footer.bg-primary {
     padding-left: 1rem;
     padding-right: 1rem;
@@ -325,22 +167,21 @@ body {
   }
 }
 
-/* Make social links in footer more visible */
-.footer-menu .social-links {
-  gap: 12px;
-}
-.footer-menu .social svg {
-  width: 32px !important;
-  height: 32px !important;
-  fill: #fff !important;
-  background: #7c1515;
-  border-radius: 50%;
-  padding: 4px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-  transition: background 0.2s, transform 0.2s;
-}
-.footer-menu .social a:hover svg {
-  background: #ff0000;
-  transform: scale(1.1);
-  fill: #e3ebff !important;
+@media (max-width: 600px) {
+  .teachers-header h1 {
+    font-size: 1.6rem;
+  }
+  .teacher-card h4 {
+    font-size: 1rem;
+  }
+  .teacher-card .subject {
+    font-size: 0.9rem;
+  }
+  .teacher-img {
+    width: 90px;
+    height: 90px;
+  }
+  .navbar .navbar-brand .logo {
+    max-height: 40px;
+  }
 }

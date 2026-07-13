@@ -1,130 +1,29 @@
-.navbar-nav .nav-link {
-  font-size: 14px !important;
-  font-family: 'Roboto', Arial, sans-serif !important;
-  color: #fff !important;
-  text-transform: uppercase !important;
-  font-weight: 500 !important;
-  letter-spacing: 0.5px !important;
-}
+/* ==========================================================
+   Contact page — page-specific styles
+   (base nav/header/footer/typography now come from style.css)
+   ========================================================== */
 
-/* Navbar background color set to black for consistency */
+/* Navbar background kept consistent with the rest of the site */
 .navbar.second-header,
 #primary-header.navbar,
-.header-top.first-header {
-  background-color: #000 !important;
+.header-top.first-header,
+#bdNavbar {
+  background-color: var(--dark-color) !important;
 }
-/* Contact Page Styles */
+header {
+  background-color: var(--dark-color);
+}
+
 body {
   background: #faf8f8;
   font-family: 'Segoe UI', Arial, sans-serif;
-  /* Footer styles and functionalities */
-#footer.bg-primary {
-	background-color: #ca0909 !important;
-	color: #fff;
-	padding-top: 3rem;
-	padding-bottom: 2rem;
 }
 
-.footer-menu {
-	margin-bottom: 2rem;
-	background-color: #ca0909;
-}
-.footer-menu h5,
-.footer-menu h6 {
-	color: #fff;
-	font-weight: 600;
-	margin-bottom: 1rem;
-}
-.footer-menu ul.menu-list {
-	padding-left: 0;
-}
-.footer-menu ul.menu-list li {
-	margin-bottom: 0.5rem;
-}
-.footer-menu ul.menu-list a {
-	color: #fff;
-	text-decoration: none;
-	font-weight: 300;
-	transition: color 0.2s;
-  text-transform: capitalize;
-}
-.footer-menu ul.menu-list a:hover {
-	color: #ff0000;
-	text-decoration: underline;
-}
-
-.social-links {
-	margin-top: 1rem;
-}
-.social-links a {
-	color: #fff;
-	margin-right: 0.5rem;
-	transition: color 0.2s;
-}
-.social-links a:hover {
-	color: #ff0000;
-}
-.footer-bottom {
-	border-top: 1px solid rgba(255,255,255,0.2);
-	margin-top: 2rem;
-	padding-top: 1rem;
-	font-size: 1rem;
-	color: #fff;
-}
-.footer-bottom p {
-	margin-bottom: 0;
-}
-@media (max-width: 768px) {
-	.footer-menu {
-		text-align: center;
-	}
-	.footer-menu .logo {
-		margin-left: auto;
-		margin-right: auto;
-	}
-}
-
-.navbar-nav .nav-link {
-  color: #fff !important;
-  font-size: 14px;
-  font-weight: 500;
-  text-transform: uppercase;
-  font-family: 'Roboto', Arial, sans-serif;
-}
-.navbar-nav .nav-link.active,
-.navbar-nav .nav-link:hover {
-  color: #ff0000 !important;
-}
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-  transition: 0.3s ease-in-out;
-  text-transform: uppercase;
-  color: white;
-  font-family: "Roboto", sans-serif;
-}
-
-a:hover {
-  color: var(--tertiary-color);
-}
-
-.text-light {
-  color: var(--light-color) !important;
-}
-
-.text-primary {
-  color: var(--primary-color) !important;
-}
-
-header {
-  background-color: #636161;
-}
-
-
-.contact-header{
-    margin-top: 90px;
+.contact-header {
+  margin-top: 90px;
+  background: linear-gradient(90deg, var(--tertiary-color) 0%, var(--secondary-color) 100%);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(26,8,126,0.08);
 }
 
 #schoolGalleryCarousel {
@@ -156,68 +55,6 @@ header {
   }
 }
 
-#primary-header .search-dropdown .dropdown-menu button {
-	padding: 0 12px;
-	min-height: -webkit-fill-available;
-	border-radius: 0.25rem;
-}
-
-.btn-close.btn-close-black {
-	filter: invert(1) brightness(2);
-}
-
-.navbar-nav .nav-link {
-	color: #fff !important;
-}
-.navbar-nav .nav-link.active,
-.navbar-nav .nav-link:hover {
-	color: #ff0000 !important;
-}
-
-@media only screen and (max-width: 610px) {
-	#primary-header.hidden {
-		transform: translateY(-105%);
-	}
-	#bdNavbar{
-		background-color: black;
-	}
-}
-
-@media only screen and (max-width: 990px) {
-	a.nav-link {
-		color: var(--dark-color);
-		font-size: 2rem;
-		padding: 1rem 0 1rem 0 !important;
-	}
-	a.nav-link:focus {
-		color: var(--dark-color);
-	}
-	a.nav-link.active,
-	.nav-link.show,
-	a.nav-link:hover {
-		color: var(--dark-color) !important;
-	}
-  #bdNavbar {
-    background-color: #000 !important;
-  }
-}
-
-.btn-close.btn-close-black {
-  filter: invert(1) brightness(2);
-}
-/* Contact Page Styles */
-body {
-  background: #f8f9fa;
-  font-family: 'Segoe UI', Arial, sans-serif;
-}
-
-
-.contact-header {
-  background: linear-gradient(90deg, #7e0808 60%, #8e3a3a 100%);
-  color: #fff;
-  box-shadow: 0 2px 8px rgba(26,8,126,0.08);
-}
-
 .contact-form {
   background: #fff;
   border: 1px solid #e3e3e3;
@@ -225,7 +62,7 @@ body {
 }
 .contact-form .form-label {
   font-weight: 500;
-  color: #7e0808;
+  color: var(--tertiary-color);
 }
 .contact-form .form-control {
   border-radius: 6px;
@@ -233,18 +70,18 @@ body {
   transition: border-color 0.2s;
 }
 .contact-form .form-control:focus {
-  border-color: #7e0808;
+  border-color: var(--tertiary-color);
   box-shadow: 0 0 0 2px rgba(26,8,126,0.15);
 }
 .contact-form button {
-  background: #7e0808;
+  background: var(--tertiary-color);
   border: none;
   font-weight: 600;
   letter-spacing: 0.5px;
   transition: background 0.2s;
 }
 .contact-form button:hover {
-  background: #8e3a3a;
+  background: var(--secondary-color);
 }
 
 .contact-info li {
@@ -252,7 +89,7 @@ body {
   font-size: 1.08rem;
 }
 .contact-info a {
-  color: #7e0808;
+  color: var(--tertiary-color);
   text-decoration: none;
 }
 .contact-info a:hover {
@@ -275,9 +112,30 @@ body {
 }
 
 footer.bg-primary {
-  background: #7e0808 !important;
+  background: var(--primary-color) !important;
   color: #fff;
   box-shadow: 0 -2px 8px rgba(126, 8, 8, 0.08);
+}
+
+/* Remove color boxes from menu and close button */
+.navbar-toggler {
+  background-color: transparent !important;
+  border: none !important;
+}
+.btn-close {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  filter: invert(1) brightness(2);
+}
+
+/* Make menu / close icons clearly visible on the dark navbar */
+.navbar-toggler svg {
+  display: inline-block !important;
+  width: 44px !important;
+  height: 44px !important;
+  color: #fff !important;
+  fill: #fff !important;
+  opacity: 1 !important;
 }
 
 @media (max-width: 991px) {
@@ -287,19 +145,9 @@ footer.bg-primary {
   .contact-form {
     margin-bottom: 2rem;
   }
-
-  .navbar-nav .nav-link {
-		font-size: 21px !important;
-		font-family: 'Roboto', Arial, sans-serif !important;
-		color: #fff !important;
-		text-transform: uppercase !important;
-		font-weight: 500 !important;
-		letter-spacing: 0.5px !important;
-	}
-
   footer {
-  text-align: center;
-}
+    text-align: center;
+  }
 }
 
 @media (max-width: 767px) {
@@ -315,34 +163,4 @@ footer.bg-primary {
   .map-responsive iframe {
     height: 180px;
   }
-}
-
-/* Remove color boxes from menu and close button */
-.navbar-toggler {
-  background-color: transparent !important;
-  border: none !important;
-}
-.btn-close {
-  background-color: transparent !important;
-  box-shadow: none !important;
-}
-
-/* Make menu and close icon visible */
-.navbar-toggler .navbar-toggler-icon,
-.navbar-toggler svg {
-  color: #7e0808 !important;
-  fill: #7e0808 !important;
-}
-.btn-close {
-  filter: invert(18%) sepia(98%) saturate(7470%) hue-rotate(246deg) brightness(90%) contrast(110%);
-}
-
-/* Force menu button (navbar-toggler) SVG icon to be visible and large */
-.navbar-toggler svg {
-  display: inline-block !important;
-  width: 60px !important;
-  height: 60px !important;
-  color: #fff !important;
-  fill: #fff !important;
-  opacity: 1 !important;
 }
