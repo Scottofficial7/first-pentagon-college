@@ -1390,12 +1390,14 @@ window.SMA = (() => {
           behaviouralRatings: { ...(r.behaviouralRatings || {}), ...(rec.behaviouralRatings || {}) },
           psychomotorRatings: { ...(r.psychomotorRatings || {}), ...(rec.psychomotorRatings || {}) },
           ...(rec.teacherComment !== undefined ? { teacherComment: rec.teacherComment } : {}),
+          ...(rec.teacherName !== undefined ? { teacherName: rec.teacherName } : {}),
         } : r);
       } else {
         records = [{
           behaviouralRatings: rec.behaviouralRatings || {},
           psychomotorRatings: rec.psychomotorRatings || {},
           teacherComment: rec.teacherComment || '',
+          teacherName: rec.teacherName || '',
           studentName: rec.studentName,
           class: rec.class,
           teacher: rec.teacher,
@@ -2713,11 +2715,7 @@ window.SMA = (() => {
           <label class="form-label">Proprietress / Principal's Comment</label>
           <textarea class="form-control" id="gradeProprietressComment" style="min-height:70px" placeholder="e.g. Keep up the excellent work…"></textarea>
         </div>
-        <div style="font-size:.75rem;color:var(--muted);margin-top:.4rem">💡 Class Teacher's Comments are now entered per child in <strong>🧠 Domains</strong>, so each student gets their own personalised remark instead of one comment for the whole subject sheet.</div>
-      </div>
-      <div style="margin-top:.75rem">
-        <label class="form-label">Class Teacher's Name</label>
-        <input type="text" class="form-control" id="gradeTeacherName" placeholder="Full name of class teacher">
+        <div style="font-size:.75rem;color:var(--muted);margin-top:.4rem">💡 Class Teacher's Comment and Name are now entered per child in <strong>🧠 Domains</strong>, so each student gets their own personalised remark and signature instead of one comment for the whole subject sheet.</div>
       </div>
     </div>
     <div class="modal-footer" style="justify-content:space-between;flex-wrap:wrap;gap:.5rem">
@@ -4234,7 +4232,9 @@ async function submitContent(mode) {
     if (!ok) return;
   }
 
-  const bodyHTML = document.getElementById('richEditor').innerHTML;
+  const instructionsText = document.getElementById('uploadInstructions').value.trim();
+  const bodyHTML = document.getElementById('richEditor').innerHTML +
+    (instructionsText ? `<p><strong>Instructions / Notes:</strong> ${instructionsText.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</p>` : '');
   const bodyPlain = bodyHTML.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
   const dueDate = document.getElementById('uploadDueDate').value || null;
   const teacherDisplayName = currentTeacher.name || currentTeacher.username;
@@ -4661,6 +4661,7 @@ function applyLPTemplate(template) {
       document.getElementById(id).value = '';
     });
     document.getElementById('lpEditor').innerHTML = '';
+    const f = document.getElementById('lpFiles'); if (f) f.value = '';
   }
   populateClassOptions();
   populateSubjectOptions();
@@ -4669,12 +4670,13 @@ function applyLPTemplate(template) {
 }
 
 function openLessonPlanModal(){ openLPTemplateModal(); }
-function closeLPModal(){document.getElementById('lessonPlanModal').classList.remove('open')}
+function closeLPModal(){document.getElementById('lessonPlanModal').classList.remove('open'); const f=document.getElementById('lpFiles'); if(f) f.value='';}
 
 async function saveLPDraft() {
   const title = document.getElementById('lpTitle').value.trim();
   if(!title){showToast('Please enter a title','error');return}
   const lpType = document.getElementById('lpType').value;
+  const attachments = await _collectLPAttachments();
   const data = {
     type: lpType,
     title,
@@ -4682,7 +4684,12 @@ async function saveLPDraft() {
     class: document.getElementById('lpClass').value,
     term: parseInt(document.getElementById('lpTerm').value),
     week: document.getElementById('lpWeek').value,
+    duration: document.getElementById('lpDuration').value,
+    objectives: document.getElementById('lpObjectives').value.trim(),
     content: document.getElementById('lpEditor').innerHTML,
+    resources: document.getElementById('lpResources').value.trim(),
+    evaluation: document.getElementById('lpEvaluation').value.trim(),
+    attachments,
     teacher: currentTeacher.username,
     status: 'Draft',
   };
@@ -4698,12 +4705,18 @@ async function submitLP() {
   const subj = document.getElementById('lpSubject').value;
   if(!title||!cls||!subj){showToast('Please fill all required fields','error');return}
   const lpType = document.getElementById('lpType').value;
+  const attachments = await _collectLPAttachments();
   const data = {
     type: lpType,
     title, subject: subj, class: cls,
     term: parseInt(document.getElementById('lpTerm').value),
     week: document.getElementById('lpWeek').value,
+    duration: document.getElementById('lpDuration').value,
+    objectives: document.getElementById('lpObjectives').value.trim(),
     content: document.getElementById('lpEditor').innerHTML,
+    resources: document.getElementById('lpResources').value.trim(),
+    evaluation: document.getElementById('lpEvaluation').value.trim(),
+    attachments,
     teacher: currentTeacher.username,
     status: 'Pending',
   };
@@ -4711,6 +4724,28 @@ async function submitLP() {
   else await SMA.addLessonPlan(data);
   closeLPModal(); renderLessonPlans(); renderDashboard();
   showToast('📤 Lesson plan submitted for admin approval!','success');
+}
+
+// Reads whatever files are currently selected in the "Attach Documents" picker
+// and returns them as [{name, size, dataUrl}], so drafts/submissions actually
+// carry their attachments instead of silently dropping them.
+async function _collectLPAttachments() {
+  const input = document.getElementById('lpFiles');
+  if (!input || !input.files || !input.files.length) return [];
+  const files = Array.from(input.files);
+  const oversized = files.filter(f => f.size > MAX_FILE_BYTES);
+  if (oversized.length) {
+    showToast(`${oversized.map(f=>f.name).join(', ')} too large (max 700KB) — skipped`, 'error');
+  }
+  const results = await Promise.all(
+    files.filter(f => f.size <= MAX_FILE_BYTES).map(async f => {
+      try {
+        const dataUrl = await _readFileAsDataURL(f);
+        return { name: f.name, size: (f.size/1024).toFixed(0) + 'KB', dataUrl };
+      } catch(e) { console.warn('Attachment read failed:', f.name, e); return null; }
+    })
+  );
+  return results.filter(Boolean);
 }
 
 function filterLP(btn, term) {
@@ -5289,11 +5324,11 @@ async function renderStudents() {
                     <span class="badge badge-approved" style="flex-shrink:0;font-size:.65rem">Active</span>
                   </div>
 
-                  <!-- Edit name -->
+                  <!-- Edit profile -->
                   <div style="margin-bottom:.7rem">
                     <button class="btn btn-xs btn-outline" style="width:100%;justify-content:center"
-                      onclick="openEditStudentNameModal('${cls}','${s.replace(/'/g,"\\'")}')">
-                      ✏️ Edit Name
+                      onclick="openEditStudentProfileModal('${cls}','${s.replace(/'/g,"\\'")}')">
+                      ✏️ Edit Profile
                     </button>
                   </div>
 
@@ -5370,7 +5405,7 @@ async function renderStudents() {
                   <td><strong style="font-size:.85rem">${s}</strong></td>
                   <td><span class="badge badge-secondary-class">${cls}</span></td>
                   <td><span class="badge badge-approved">Active</span></td>
-                  <td><button class="btn btn-xs btn-outline" onclick="openEditStudentNameModal('${cls}','${s.replace(/'/g,"\\'")}')">✏️ Edit Name</button></td>
+                  <td><button class="btn btn-xs btn-outline" onclick="openEditStudentProfileModal('${cls}','${s.replace(/'/g,"\\'")}')">✏️ Edit Profile</button></td>
                 </tr>`).join('')}
               </tbody>
             </table>
@@ -5762,7 +5797,6 @@ async function editResult(id){
     });
   }
 
-  document.getElementById('gradeTeacherName').value = r.teacherName || '';
   document.getElementById('gradeProprietressComment').value = r.proprietressComment || '';
 }
 
@@ -6033,7 +6067,7 @@ async function saveGrades() {
     savedResult = {
       ...existing,
       class:cls, subject, term, type, scores,
-      teacherName: document.getElementById('gradeTeacherName').value.trim() || currentTeacher.name,
+      teacherName: existing.teacherName || currentTeacher.name,
       proprietressComment: document.getElementById('gradeProprietressComment').value.trim()
     };
     examResults[idx] = savedResult;
@@ -6073,7 +6107,7 @@ async function saveGrades() {
     date: new Date().toISOString().split('T')[0],
     status:'draft', teacher:currentTeacher.username,
     refNo, notes:'', scores,
-    teacherName: document.getElementById('gradeTeacherName').value.trim() || currentTeacher.name,
+    teacherName: currentTeacher.name,
     proprietressComment: document.getElementById('gradeProprietressComment').value.trim()
   };
   examResults.push(newResult);
@@ -9212,10 +9246,10 @@ function toggleNewStudentSubject(btn, subj) {
 }
 
 // ═══════════════════════════════════════════
-// EDIT STUDENT NAME (available to class teachers)
+// EDIT STUDENT PROFILE (available to all teachers who can view the class)
 // ═══════════════════════════════════════════
-async function openEditStudentNameModal(cls, studentName) {
-  const existingModal = document.getElementById('editStudentNameModal');
+async function openEditStudentProfileModal(cls, studentName) {
+  const existingModal = document.getElementById('editStudentProfileModal');
   if (existingModal) existingModal.remove();
 
   const allStudents = await SMA.getStudents();
@@ -9225,36 +9259,64 @@ async function openEditStudentNameModal(cls, studentName) {
   );
   if (!target) { showToast('Student record not found in database.', 'error'); return; }
 
+  const esc = v => (v || '').toString().replace(/"/g,'&quot;');
+
   const modal = document.createElement('div');
   modal.className = 'modal-backdrop';
-  modal.id = 'editStudentNameModal';
+  modal.id = 'editStudentProfileModal';
   modal.style.cssText = 'display:flex;align-items:center;justify-content:center;';
-  modal.onclick = function(e) { if (e.target === this) closeEditStudentNameModal(); };
+  modal.onclick = function(e) { if (e.target === this) closeEditStudentProfileModal(); };
   modal.innerHTML = `
-    <div class="modal" style="max-width:460px;width:100%">
+    <div class="modal" style="max-width:480px;width:100%">
       <div class="modal-header">
-        <h3 class="modal-title">✏️ Edit Student Name — ${cls}</h3>
-        <button class="modal-close" onclick="closeEditStudentNameModal()">✕</button>
+        <h3 class="modal-title">✏️ Edit Student Profile — ${cls}</h3>
+        <button class="modal-close" onclick="closeEditStudentProfileModal()">✕</button>
       </div>
       <div class="modal-body">
-        <input type="hidden" id="editStudentNameId" value="${target.id}">
+        <input type="hidden" id="editStudentProfileId" value="${target.id}">
         <div style="background:var(--info-bg,#eff6ff);border-radius:10px;padding:.65rem 1rem;font-size:.8rem;color:var(--info-text,#1e40af);margin-bottom:1rem">
-          💡 Correcting the name will also regenerate the student's username and default password to match it. Be sure to share the new login details with the student.
+          💡 Changing the name will also regenerate the student's username and default password to match it. Be sure to share the new login details with the student.
         </div>
-        <div class="form-group">
-          <label class="form-label">First Name <span style="color:var(--danger)">*</span></label>
-          <input type="text" id="editStudentFirstName" class="form-control" value="${(target.firstName || '').replace(/"/g,'&quot;')}">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">First Name <span style="color:var(--danger)">*</span></label>
+            <input type="text" id="editStudentFirstName" class="form-control" value="${esc(target.firstName)}">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name <span style="color:var(--danger)">*</span></label>
+            <input type="text" id="editStudentLastName" class="form-control" value="${esc(target.lastName)}">
+          </div>
         </div>
-        <div class="form-group">
-          <label class="form-label">Last Name <span style="color:var(--danger)">*</span></label>
-          <input type="text" id="editStudentLastName" class="form-control" value="${(target.lastName || '').replace(/"/g,'&quot;')}">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Date of Birth</label>
+            <input type="date" id="editStudentDob" class="form-control" value="${esc(target.dob)}">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Gender</label>
+            <select id="editStudentGender" class="form-control">
+              <option value="" ${!target.gender?'selected':''}>— Select —</option>
+              <option value="Male" ${target.gender==='Male'?'selected':''}>Male</option>
+              <option value="Female" ${target.gender==='Female'?'selected':''}>Female</option>
+            </select>
+          </div>
         </div>
-        <div id="editStudentNameErr" style="display:none;background:var(--danger-bg);color:var(--danger-text);
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Guardian Name</label>
+            <input type="text" id="editStudentGuardian" class="form-control" value="${esc(target.guardian)}">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Guardian Phone</label>
+            <input type="tel" id="editStudentGuardianPhone" class="form-control" value="${esc(target.guardianPhone)}">
+          </div>
+        </div>
+        <div id="editStudentProfileErr" style="display:none;background:var(--danger-bg);color:var(--danger-text);
           padding:.65rem 1rem;border-radius:8px;font-size:.82rem;margin-top:.5rem"></div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-outline" onclick="closeEditStudentNameModal()">Cancel</button>
-        <button class="btn btn-green" id="editStudentNameSaveBtn" onclick="saveEditStudentName('${cls}')">✅ Save Name</button>
+        <button class="btn btn-outline" onclick="closeEditStudentProfileModal()">Cancel</button>
+        <button class="btn btn-green" id="editStudentProfileSaveBtn" onclick="saveEditStudentProfile('${cls}')">✅ Save Profile</button>
       </div>
     </div>`;
   document.body.appendChild(modal);
@@ -9262,17 +9324,21 @@ async function openEditStudentNameModal(cls, studentName) {
   document.getElementById('editStudentFirstName').focus();
 }
 
-function closeEditStudentNameModal() {
-  const m = document.getElementById('editStudentNameModal');
+function closeEditStudentProfileModal() {
+  const m = document.getElementById('editStudentProfileModal');
   if (m) { m.classList.remove('open'); setTimeout(() => m.remove(), 300); }
 }
 
-async function saveEditStudentName(cls) {
-  const id = document.getElementById('editStudentNameId').value;
+async function saveEditStudentProfile(cls) {
+  const id = document.getElementById('editStudentProfileId').value;
   const fn = document.getElementById('editStudentFirstName').value.trim();
   const ln = document.getElementById('editStudentLastName').value.trim();
-  const errDiv = document.getElementById('editStudentNameErr');
-  const btn = document.getElementById('editStudentNameSaveBtn');
+  const dob = document.getElementById('editStudentDob').value;
+  const gender = document.getElementById('editStudentGender').value;
+  const guardian = document.getElementById('editStudentGuardian').value.trim();
+  const guardianPhone = document.getElementById('editStudentGuardianPhone').value.trim();
+  const errDiv = document.getElementById('editStudentProfileErr');
+  const btn = document.getElementById('editStudentProfileSaveBtn');
   const showErr = msg => { errDiv.textContent = msg; errDiv.style.display = 'block'; };
   errDiv.style.display = 'none';
 
@@ -9280,17 +9346,26 @@ async function saveEditStudentName(cls) {
 
   btn.disabled = true; btn.textContent = 'Saving…';
   try {
-    await SMA.updateStudent(id, { firstName: fn, lastName: ln }, { forceSync: true });
-    await SMA.logActivity(`Student name corrected to ${fn} ${ln} (${cls}) by ${currentTeacher?.name || currentTeacher?.username || 'a teacher'}`, '✏️', 'info').catch(()=>{});
-    closeEditStudentNameModal();
+    const students = await SMA.getStudents();
+    const before = students.find(s => s.id === id) || {};
+    const nameChanged = fn !== (before.firstName || '') || ln !== (before.lastName || '');
+
+    await SMA.updateStudent(id, { firstName: fn, lastName: ln, dob, gender, guardian, guardianPhone });
+    await SMA.logActivity(`Student profile updated for ${fn} ${ln} (${cls}) by ${currentTeacher?.name || currentTeacher?.username || 'a teacher'}`, '✏️', 'info').catch(()=>{});
+    closeEditStudentProfileModal();
     renderStudents();
-    const updated = (await SMA.getStudents()).find(s => s.id === id);
-    const newUsername = updated?.username;
-    const newPlainPw = 'fpc@' + fn.toLowerCase().replace(/\s+/g, '');
-    showToast(`✅ Name updated to ${fn} ${ln} — new login: ${newUsername} / ${newPlainPw}`, 'success');
+
+    if (nameChanged) {
+      const updated = (await SMA.getStudents()).find(s => s.id === id);
+      const newUsername = updated?.username;
+      const newPlainPw = 'fpc@' + fn.toLowerCase().replace(/\s+/g, '');
+      showToast(`✅ Profile updated — new login: ${newUsername} / ${newPlainPw}`, 'success');
+    } else {
+      showToast(`✅ Profile updated for ${fn} ${ln}`, 'success');
+    }
   } catch (e) {
-    showErr('Failed to update name: ' + e.message);
-    btn.disabled = false; btn.textContent = '✅ Save Name';
+    showErr('Failed to update profile: ' + e.message);
+    btn.disabled = false; btn.textContent = '✅ Save Profile';
   }
 }
 
@@ -9316,7 +9391,8 @@ async function saveNewStudent() {
   }
 
   const selectedSubjects = [...document.querySelectorAll('#newStudentSubjectChips .subject-chip.active')].map(b=>b.textContent);
-  await SMA.addStudent({ firstName, lastName, class: cls, subjects: selectedSubjects });
+  const admissionNumber = document.getElementById('newStudentId').value.trim();
+  await SMA.addStudent({ firstName, lastName, class: cls, subjects: selectedSubjects, ...(admissionNumber ? { admissionNumber } : {}) });
 
   closeAddStudentModal();
   renderStudents();
@@ -9646,10 +9722,14 @@ document.addEventListener('keydown', e => {
         </div>
         <div id="domainPendingBanner" style="display:none;margin-bottom:1.2rem"></div>
 
-        <!-- Class Teacher's Comment (per child) -->
+        <!-- Class Teacher's Comment & Name (per child) -->
         <div class="form-group">
           <label class="form-label">Class Teacher's Comment</label>
           <textarea class="form-control" id="domainTeacherComment" style="min-height:70px" placeholder="e.g. A hardworking pupil with great potential…"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Class Teacher's Name</label>
+          <input type="text" class="form-control" id="domainTeacherName" placeholder="Full name of class teacher">
         </div>
 
         <!-- Affective Domain -->
@@ -9737,6 +9817,7 @@ function openDomainEditorModal() {
   document.getElementById('domainSaveBtn').style.display = 'none';
   document.getElementById('domainSaveStatus').style.display = 'none';
   document.getElementById('domainTeacherComment').value = '';
+  document.getElementById('domainTeacherName').value = '';
   _domainCurrentStudentId = null;
   _domainCurrentStudentName = null;
   _domainSelections = { behavioural: {}, psychomotor: {} };
@@ -9816,6 +9897,7 @@ async function loadDomainRatings() {
   let existingBehavioural = {};
   let existingPsychomotor = {};
   let existingComment = '';
+  let existingTeacherName = '';
   if (_domainCurrentStudentId) {
     try {
       const perStudent = await firebase.firestore().collection('results').doc(_domainCurrentStudentId).get();
@@ -9825,6 +9907,7 @@ async function loadDomainRatings() {
           existingBehavioural = records[0].behaviouralRatings || {};
           existingPsychomotor = records[0].psychomotorRatings || {};
           existingComment = records[0].teacherComment || '';
+          existingTeacherName = records[0].teacherName || '';
         }
       } else {
         const snap = await firebase.firestore().collection('config').doc('results').get();
@@ -9834,12 +9917,14 @@ async function loadDomainRatings() {
           existingBehavioural = records[0].behaviouralRatings || {};
           existingPsychomotor = records[0].psychomotorRatings || {};
           existingComment = records[0].teacherComment || '';
+          existingTeacherName = records[0].teacherName || '';
         }
       }
     } catch(e) { console.error('loadDomainRatings error:', e); }
   }
 
   document.getElementById('domainTeacherComment').value = existingComment;
+  document.getElementById('domainTeacherName').value = existingTeacherName || (currentTeacher ? currentTeacher.name : '');
 
   // Seed JS state with loaded values so saves don't erase existing ratings.
   _domainSelections = {
@@ -9954,6 +10039,7 @@ async function saveDomainRatings() {
     // go to the admin as a Pending approval request; the ratings only appear
     // on the student's report card once an admin approves the request.
     const teacherComment = document.getElementById('domainTeacherComment').value.trim();
+    const teacherNameVal = document.getElementById('domainTeacherName').value.trim() || currentTeacher.name;
 
     await SMA.submitDomainApproval({
       studentId: _domainCurrentStudentId,
@@ -9963,6 +10049,7 @@ async function saveDomainRatings() {
       behaviouralRatings: bRatings,
       psychomotorRatings: pRatings,
       teacherComment: teacherComment,
+      teacherName: teacherNameVal,
     });
 
     statusDiv.style.display = 'block';

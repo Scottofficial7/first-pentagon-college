@@ -409,12 +409,14 @@ window.SMA = (() => {
           behaviouralRatings: { ...(r.behaviouralRatings || {}), ...(rec.behaviouralRatings || {}) },
           psychomotorRatings: { ...(r.psychomotorRatings || {}), ...(rec.psychomotorRatings || {}) },
           ...(rec.teacherComment !== undefined ? { teacherComment: rec.teacherComment } : {}),
+          ...(rec.teacherName !== undefined ? { teacherName: rec.teacherName } : {}),
         } : r);
       } else {
         records = [{
           behaviouralRatings: rec.behaviouralRatings || {},
           psychomotorRatings: rec.psychomotorRatings || {},
           teacherComment: rec.teacherComment || '',
+          teacherName: rec.teacherName || '',
           studentName: rec.studentName,
           class: rec.class,
           teacher: rec.teacher,
@@ -465,6 +467,9 @@ window.SMA = (() => {
             }
             if (rec.teacherComment !== undefined && copy.teacherComment === rec.teacherComment) {
               delete copy.teacherComment;
+            }
+            if (rec.teacherName !== undefined && copy.teacherName === rec.teacherName) {
+              delete copy.teacherName;
             }
             return copy;
           });
@@ -768,6 +773,40 @@ window.SMA = (() => {
   // Bulk-overwrites the legacy config/results map (used by backup restore).
   async function saveAllResults(allResultsMap) {
     return setDoc('config', 'results', allResultsMap);
+  }
+
+  /* ═══════════ WITHHELD / SEIZED RESULTS ═══════════ */
+  // Independent of getAllResults()/saveResult() above. An admin can withhold
+  // (seize) an individual student's result even after results are globally
+  // released; the student portal then shows a "Result Seized" notice instead
+  // of their report card until the entry is removed.
+  // Stored as config/withheldResults = { [studentId]: { withheld, reason, withheldAt, withheldBy } }
+  async function getWithheldResults() {
+    return (await getDoc('config', 'withheldResults')) || {};
+  }
+  async function isResultWithheld(studentId) {
+    const map = await getWithheldResults();
+    const entry = map[studentId];
+    return (entry && entry.withheld) ? entry : null;
+  }
+  async function setWithheldResult(studentId, reason, withheldBy) {
+    try {
+      await db.collection('config').doc('withheldResults').set(
+        { [studentId]: { withheld: true, reason: reason || '', withheldAt: new Date().toISOString(), withheldBy: withheldBy || 'Admin' } },
+        { merge: true }
+      );
+      await logActivity(`Result withheld for student ${studentId}${reason ? ': ' + reason : ''}`, '🔒', 'warning');
+      return true;
+    } catch(e) { console.error('setWithheldResult failed:', e); return false; }
+  }
+  async function releaseWithheldResult(studentId) {
+    try {
+      await db.collection('config').doc('withheldResults').set(
+        { [studentId]: firebase.firestore.FieldValue.delete() }, { merge: true }
+      );
+      await logActivity(`Result released back to student ${studentId}`, '🔓', 'success');
+      return true;
+    } catch(e) { console.error('releaseWithheldResult failed:', e); return false; }
   }
 
   /* ═══════════ SETTINGS ═══════════ */
@@ -1419,6 +1458,7 @@ window.SMA = (() => {
     getPayments, addPayment, savePayments, confirmPayment, rejectPayment, getPaymentProof, deletePaymentProof,
     getAnnouncements, addAnnouncement, removeAnnouncement, toggleAnnouncementPin, saveAnnouncements,
     getResults, saveResult, getAllResults, saveAllResults,
+    getWithheldResults, isResultWithheld, setWithheldResult, releaseWithheldResult,
     getProfile, saveProfile, getAvatar, saveAvatar,
     getActivity, logActivity, saveActivity,
     setPresence, clearPresence, getOnlineUsers,

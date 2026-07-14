@@ -3150,10 +3150,42 @@ async function renderFees() {
 // synchronously off the tap — see printReportCard() for why that matters.
 let _cachedResults         = null;
 let _cachedResultsReleased = false;
+let _cachedWithholdInfo    = null;
 
 async function renderResults() {
   const cont     = document.getElementById('resultsContent');
   const printBtn = document.getElementById('printReportBtn');
+
+  // ── Check if this student's result has been individually withheld/seized by admin ──
+  // This is checked BEFORE the global release flag: a withheld result stays hidden
+  // even after the school releases results generally.
+  let withholdInfo = null;
+  try {
+    const db = firebase.firestore();
+    const whSnap = await db.collection('config').doc('withheldResults').get();
+    const whMap  = whSnap.exists ? (whSnap.data() || {}) : {};
+    const entry  = whMap[currentStudentData.id];
+    if (entry && entry.withheld) withholdInfo = entry;
+  } catch(e) { console.warn('renderResults: could not check withheld flag', e); }
+  _cachedWithholdInfo = withholdInfo;
+
+  if (withholdInfo) {
+    _cachedResults = null;
+    if (printBtn) printBtn.style.display = 'none';
+    cont.innerHTML = `
+      <div style="text-align:center;padding:3.5rem 1.5rem;background:#fff;border-radius:16px;border:1.5px dashed var(--danger);box-shadow:var(--card-shadow)">
+        <div style="font-size:3.2rem;margin-bottom:.9rem">🚫</div>
+        <div style="font-family:'Sora',sans-serif;font-size:1.1rem;font-weight:700;color:var(--danger);margin-bottom:.4rem">Result Seized</div>
+        <div style="font-size:.85rem;color:var(--muted);max-width:340px;margin:0 auto;line-height:1.6">
+          Your result has been withheld by the school administration${withholdInfo.reason ? ':' : '.'}
+        </div>
+        ${withholdInfo.reason ? `<div style="margin-top:.9rem;max-width:340px;margin-left:auto;margin-right:auto;background:var(--danger-bg);color:var(--danger-text);font-size:.82rem;font-weight:600;padding:.7rem 1rem;border-radius:10px;line-height:1.5">${withholdInfo.reason}</div>` : ''}
+        <div style="margin-top:1.5rem;display:inline-flex;align-items:center;gap:.5rem;background:var(--info-bg);color:var(--info-text);font-size:.78rem;font-weight:700;padding:.45rem 1.1rem;border-radius:20px;border:1px solid rgba(37,99,235,.18)">
+          🏫 Please contact the school office to resolve this
+        </div>
+      </div>`;
+    return;
+  }
 
   // ── Check if admin has released results ──
   let resultsReleased = false;

@@ -2220,6 +2220,7 @@
                 <option value="2">Second Term</option>
                 <option value="3">Third Term</option>
               </select>
+              <button class="btn btn-outline btn-sm" onclick="openBulkCommentModal()">💬 Comment for All</button>
               <button class="btn btn-crimson btn-sm" onclick="openNextTermModal()">📅 Set Next Term Date</button>
             </div>
           </div>
@@ -3443,6 +3444,7 @@ async function doLogin() {
       { name: 'renderAnnouncements',   fn: renderAnnouncements },
       { name: 'renderOnlineUsers',     fn: renderOnlineUsers },
       { name: 'loadSettings',          fn: loadSettings },
+      { name: 'loadCalendarEvents',    fn: loadCalendarEvents },
     ];
     // Fix: Promise.all would abort the ENTIRE load the moment any single
     // task threw, leaving the rest of the dashboard unrendered — that's
@@ -5639,30 +5641,38 @@ async function renderClassList(cls) {
 function _rField(item, type) {
   if (type === 'plan') {
     return {
-      teacher  : item.teacherName || item.teacher || item.firstName || '—',
-      subject  : item.subject || item.subjectName || item.subjects || '—',
-      cls      : item.class || item.className || item.teacherClass || item.assignedClass || '—',
-      topic    : item.topic || item.lessonTopic || item.title || '(Untitled)',
-      week     : item.week || item.weekNumber || '—',
-      duration : item.duration || item.periods || '—',
-      date     : item.date || item.submittedAt || item.createdAt || '—',
-      status   : item.status || 'Pending',
-      remarks  : item.remarks || item.comment || item.feedback || item.adminNote || item.adminComment || '',
-      body     : item.content || item.note || item.body || item.description || '',
+      teacher    : item.teacherName || item.teacher || item.firstName || '—',
+      subject    : item.subject || item.subjectName || item.subjects || '—',
+      cls        : item.class || item.className || item.teacherClass || item.assignedClass || '—',
+      topic      : item.topic || item.lessonTopic || item.title || '(Untitled)',
+      week       : item.week || item.weekNumber || '—',
+      duration   : item.duration || item.periods || '—',
+      date       : item.date || item.submittedAt || item.createdAt || '—',
+      status     : item.status || 'Pending',
+      remarks    : item.remarks || item.comment || item.feedback || item.adminNote || item.adminComment || '',
+      body       : item.content || item.note || item.body || item.description || '',
+      objectives : item.objectives || '',
+      resources  : item.resources || '',
+      evaluation : item.evaluation || '',
+      attachments: item.attachments || [],
     };
   } else {
     // Lesson notes: no week or duration fields
     return {
-      teacher  : item.teacherName || item.teacher || item.firstName || '—',
-      subject  : item.subject || item.subjectName || item.subjects || '—',
-      cls      : item.class || item.className || item.teacherClass || item.assignedClass || '—',
-      topic    : item.topic || item.lessonTopic || item.title || '(Untitled)',
-      week     : null,
-      duration : null,
-      date     : item.date || item.submittedAt || item.createdAt || '—',
-      status   : item.status || 'Pending',
-      remarks  : item.remarks || item.comment || item.feedback || item.adminNote || item.adminComment || '',
-      body     : item.content || item.note || item.body || item.description || '',
+      teacher    : item.teacherName || item.teacher || item.firstName || '—',
+      subject    : item.subject || item.subjectName || item.subjects || '—',
+      cls        : item.class || item.className || item.teacherClass || item.assignedClass || '—',
+      topic      : item.topic || item.lessonTopic || item.title || '(Untitled)',
+      week       : null,
+      duration   : null,
+      date       : item.date || item.submittedAt || item.createdAt || '—',
+      status     : item.status || 'Pending',
+      remarks    : item.remarks || item.comment || item.feedback || item.adminNote || item.adminComment || '',
+      body       : item.content || item.note || item.body || item.description || '',
+      objectives : item.objectives || '',
+      resources  : item.resources || '',
+      evaluation : item.evaluation || '',
+      attachments: item.attachments || [],
     };
   }
 }
@@ -5679,8 +5689,20 @@ function _reportFieldTable(f, type) {
     ...(isPlan ? [['⏱️ Duration', f.duration]] : []),
     ['📅 Date Submitted', f.date],
     ['🔖 Status',        `<span style="display:inline-block">${statusBadge(f.status)}</span>`],
+    ...(f.objectives ? [['🎯 Objectives', `<span style="white-space:pre-wrap">${f.objectives}</span>`]] : []),
+    ...(f.resources  ? [['🧰 Resources',  `<span style="white-space:pre-wrap">${f.resources}</span>`]]  : []),
+    ...(f.evaluation ? [['✅ Evaluation', `<span style="white-space:pre-wrap">${f.evaluation}</span>`]] : []),
     ...(f.remarks ? [['💬 Remarks', `<span style="color:#92400e">${f.remarks}</span>`]] : []),
   ];
+
+  const attachmentsRow = (f.attachments && f.attachments.length)
+    ? `<div style="padding:.7rem .85rem;border-top:1px solid var(--border)">
+        <div style="font-weight:700;color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.3px;margin-bottom:.4rem">📎 Attachments (${f.attachments.length})</div>
+        <div style="display:flex;flex-wrap:wrap;gap:.4rem">
+          ${f.attachments.map(a => `<a href="${a.dataUrl}" download="${a.name}" class="btn btn-outline btn-xs" style="text-decoration:none">📄 ${a.name}${a.size ? ' · ' + a.size : ''}</a>`).join('')}
+        </div>
+      </div>`
+    : '';
 
   return `
     <table style="width:100%;border-collapse:collapse;font-size:.84rem">
@@ -5691,7 +5713,7 @@ function _reportFieldTable(f, type) {
             <td style="padding:.55rem .85rem;color:var(--text);font-weight:600;border-bottom:1px solid var(--border)">${r[1]}</td>
           </tr>`).join('')}
       </tbody>
-    </table>`;
+    </table>${attachmentsRow}`;
 }
 
 /* ── Render the full content/body block ── */
@@ -5882,7 +5904,7 @@ async function renderDomainApprovals() {
         </div>
       </div>
       <div style="padding:.85rem 1rem 1rem;border-top:1px solid var(--border)">
-        ${item.teacherComment ? `<div style="margin-bottom:.75rem;background:var(--bg);border-radius:8px;padding:.65rem .9rem"><div style="font-size:.72rem;font-weight:800;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.25rem">Class Teacher's Comment</div><div style="font-size:.82rem;font-style:italic;color:var(--text)">${item.teacherComment}</div></div>` : ''}
+        ${item.teacherComment ? `<div style="margin-bottom:.75rem;background:var(--bg);border-radius:8px;padding:.65rem .9rem"><div style="font-size:.72rem;font-weight:800;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.25rem">Class Teacher's Comment</div><div style="font-size:.82rem;font-style:italic;color:var(--text)">${item.teacherComment}</div>${item.teacherName ? `<div style="font-size:.75rem;font-weight:600;color:var(--muted);margin-top:.35rem;border-top:1px solid var(--border);padding-top:.3rem">Signed: ${item.teacherName}</div>` : ''}</div>` : ''}
         ${_domainRatingsTable('Affective Domain — Behavioural Traits', item.behaviouralRatings, 'var(--navy)')}
         ${_domainRatingsTable('Psychomotor Domain — Skills', item.psychomotorRatings, '#6d28d9')}
         ${item.adminComment ? `<div style="font-size:.78rem;color:var(--danger-text);margin-top:.4rem"><strong>Admin note:</strong> ${item.adminComment}</div>` : ''}
@@ -6335,7 +6357,7 @@ let calDate = new Date(_now.getFullYear(), _now.getMonth(), 1); // Start from cu
 
 // School events for 2025/2026 session – key: "YYYY-M" (0-indexed month)
 // Each event: { day, icon, title, desc, badge, badgeClass }
-const SCHOOL_EVENTS = {
+let SCHOOL_EVENTS = {
   '2026-4': [ // May 2026
     { day: 5,  icon: '📚', title: 'Third Term Resumption',      desc: 'Third term begins. All students must resume on time.',                                        badge: 'May 5',  badgeClass: 'badge-info'   },
     { day: 12, icon: '📝', title: 'Continuous Assessment Week', desc: 'CA tests for all classes. Students should study all subjects.',                                badge: 'May 12', badgeClass: 'badge-warning'},
@@ -6363,6 +6385,30 @@ const SCHOOL_EVENTS = {
 // ── helpers ─────────────────────────────────────────────────────────────────
 const _CAL_MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const _CAL_MONTHS_LONG  = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+// SCHOOL_EVENTS previously lived only in memory — any event an admin added,
+// edited, or deleted was lost on refresh. It's now persisted to Firestore at
+// config/calendarEvents, seeded from the built-in defaults above on first run.
+async function loadCalendarEvents() {
+  try {
+    const db = firebase.firestore();
+    const snap = await db.collection('config').doc('calendarEvents').get();
+    if (snap.exists && snap.data() && Object.keys(snap.data()).length) {
+      SCHOOL_EVENTS = snap.data();
+    } else {
+      // Nothing saved yet — seed Firestore with the built-in defaults so
+      // every subsequent load (and every other admin session) sees the same data.
+      await db.collection('config').doc('calendarEvents').set(SCHOOL_EVENTS);
+    }
+  } catch(e) { console.error('loadCalendarEvents failed:', e); }
+}
+async function _saveCalendarEvents() {
+  try {
+    const db = firebase.firestore();
+    await db.collection('config').doc('calendarEvents').set(SCHOOL_EVENTS);
+    return true;
+  } catch(e) { console.error('_saveCalendarEvents failed:', e); showToast('Failed to save calendar changes.', 'error'); return false; }
+}
 
 function _calBadgeLabel(yr, mo, day) {
   return _CAL_MONTHS_SHORT[mo] + ' ' + day;
@@ -6471,7 +6517,7 @@ function openCalEventModal(key, idx) {
 }
 
 // ── save (add or edit) ────────────────────────────────────────────────────────
-function saveCalEvent() {
+async function saveCalEvent() {
   const dateVal   = document.getElementById('calEventDate').value;
   const title     = document.getElementById('calEventTitle').value.trim();
   const icon      = document.getElementById('calEventIcon').value.trim() || '📌';
@@ -6505,12 +6551,14 @@ function saveCalEvent() {
       SCHOOL_EVENTS[key].push(newEvent);
       SCHOOL_EVENTS[key].sort((a, b) => a.day - b.day);
     }
+    await _saveCalendarEvents();
     showToast('Event updated successfully.', 'success');
   } else {
     // Add new
     if (!SCHOOL_EVENTS[key]) SCHOOL_EVENTS[key] = [];
     SCHOOL_EVENTS[key].push(newEvent);
     SCHOOL_EVENTS[key].sort((a, b) => a.day - b.day);
+    await _saveCalendarEvents();
     showToast('Event added successfully.', 'success');
   }
 
@@ -6527,13 +6575,14 @@ function openCalDeleteModal(key, idx, label) {
   document.getElementById('calDeleteEventName').textContent = label;
   document.getElementById('calDeleteModal').classList.add('open');
 }
-function confirmDeleteCalEvent() {
+async function confirmDeleteCalEvent() {
   if (!_calDeleteTarget) return;
   const { key, idx } = _calDeleteTarget;
   if (SCHOOL_EVENTS[key]) {
     SCHOOL_EVENTS[key].splice(idx, 1);
     if (!SCHOOL_EVENTS[key].length) delete SCHOOL_EVENTS[key];
   }
+  await _saveCalendarEvents();
   _calDeleteTarget = null;
   closeModal('calDeleteModal');
   showToast('Event deleted.', 'info');
@@ -8925,6 +8974,7 @@ function confirmTTPaste() {
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
 window.SMA = (() => {
 
@@ -9329,12 +9379,14 @@ window.SMA = (() => {
           behaviouralRatings: { ...(r.behaviouralRatings || {}), ...(rec.behaviouralRatings || {}) },
           psychomotorRatings: { ...(r.psychomotorRatings || {}), ...(rec.psychomotorRatings || {}) },
           ...(rec.teacherComment !== undefined ? { teacherComment: rec.teacherComment } : {}),
+          ...(rec.teacherName !== undefined ? { teacherName: rec.teacherName } : {}),
         } : r);
       } else {
         records = [{
           behaviouralRatings: rec.behaviouralRatings || {},
           psychomotorRatings: rec.psychomotorRatings || {},
           teacherComment: rec.teacherComment || '',
+          teacherName: rec.teacherName || '',
           studentName: rec.studentName,
           class: rec.class,
           teacher: rec.teacher,
@@ -9385,6 +9437,9 @@ window.SMA = (() => {
             }
             if (rec.teacherComment !== undefined && copy.teacherComment === rec.teacherComment) {
               delete copy.teacherComment;
+            }
+            if (rec.teacherName !== undefined && copy.teacherName === rec.teacherName) {
+              delete copy.teacherName;
             }
             return copy;
           });
@@ -9940,6 +9995,8 @@ window.SMA = (() => {
       <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
         <button class="btn btn-crimson btn-sm" onclick="saveReportCardEdits()">💾 Save Changes</button>
         <button class="btn btn-green btn-sm" onclick="printResultSheet()">🖨️ Print</button>
+        <button class="btn btn-outline btn-sm" onclick="downloadResultPDF()">⬇ PDF</button>
+        <button class="btn btn-sm" id="rdm-withhold-btn" onclick="openWithholdModal()">🔒 Withhold</button>
         <button class="modal-close" onclick="closeResultDetailModal()">✕</button>
       </div>
     </div>
@@ -9969,6 +10026,81 @@ window.SMA = (() => {
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeNextTermModal()">Cancel</button>
       <button class="btn btn-crimson" onclick="saveNextTermDate()">💾 Save Date</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     BULK PROPRIETRESS/PRINCIPAL COMMENT MODAL
+══════════════════════════════════════════ -->
+<div class="modal-backdrop" id="bulkCommentModal" onclick="if(event.target===this)closeBulkCommentModal()">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">💬 Comment for All Students</div>
+        <div style="font-size:.78rem;color:var(--muted);margin-top:3px">Apply one Proprietress / Principal's comment to many students at once — you can still open an individual student's result sheet afterward to personalise theirs.</div>
+      </div>
+      <button class="modal-close" onclick="closeBulkCommentModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Apply to</label>
+        <select class="form-control" id="bulkCommentScope" onchange="updateBulkCommentCountPreview()">
+          <option value="filtered">Students currently shown (respects search/class/term filters)</option>
+          <option value="all">All students with results</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Proprietress / Principal's Comment <span>*</span></label>
+        <textarea class="form-control" id="bulkCommentText" style="min-height:100px" placeholder="e.g. Keep up the excellent work…"></textarea>
+      </div>
+      <label style="display:flex;align-items:center;gap:.5rem;font-size:.82rem;color:var(--text);margin-top:.25rem">
+        <input type="checkbox" id="bulkCommentSkipCustom" onchange="updateBulkCommentCountPreview()">
+        Skip students who already have their own comment
+      </label>
+      <div id="bulkCommentCountPreview" style="font-size:.78rem;color:var(--muted);margin-top:.6rem"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeBulkCommentModal()">Cancel</button>
+      <button class="btn btn-crimson" id="bulkCommentApplyBtn" onclick="applyBulkComment()">📤 Apply Comment</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     WITHHOLD / SEIZE RESULT MODAL
+══════════════════════════════════════════ -->
+<div class="modal-backdrop" id="withholdModal" onclick="if(event.target===this)closeWithholdModal()">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="withholdModalTitle">🔒 Withhold Result</div>
+        <div style="font-size:.78rem;color:var(--muted);margin-top:3px" id="withholdModalSub">The student will see their result as seized/withheld until you release it.</div>
+      </div>
+      <button class="modal-close" onclick="closeWithholdModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="withholdModalReleaseView" style="display:none">
+        <div style="background:var(--danger-bg);color:var(--danger-text);border-radius:10px;padding:.8rem 1rem;font-size:.83rem;margin-bottom:1rem">
+          This result is currently withheld. The student cannot view or print it.
+        </div>
+        <div class="form-group">
+          <label class="form-label">Reason on file</label>
+          <div id="withholdReasonDisplay" style="font-size:.85rem;color:var(--text);background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.6rem .8rem;min-height:2.4rem">—</div>
+        </div>
+      </div>
+      <div id="withholdModalWithholdView">
+        <div class="form-group">
+          <label class="form-label">Reason for withholding <span>*</span></label>
+          <textarea class="form-control" id="withholdReasonInput" style="min-height:90px" placeholder="e.g. Outstanding school fees, disciplinary hold, pending verification…"></textarea>
+        </div>
+        <div style="font-size:.76rem;color:var(--muted)">The student's own portal will show a "Result Seized" notice with this reason instead of their result sheet.</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeWithholdModal()">Cancel</button>
+      <button class="btn btn-danger" id="withholdConfirmBtn" onclick="confirmWithhold()">🔒 Withhold Result</button>
+      <button class="btn btn-green" id="withholdReleaseBtn" style="display:none" onclick="confirmReleaseWithhold()">🔓 Release Result</button>
     </div>
   </div>
 </div>
@@ -10011,6 +10143,25 @@ window.SMA = (() => {
   }
   .result-card-footer { display: flex; align-items: center; justify-content: space-between; font-size: .74rem; color: var(--muted); border-top: 1px solid var(--border); padding-top: .5rem; margin-top: .2rem; }
   .result-cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
+
+  /* ── Class-by-class result groups ── */
+  .result-class-group { margin-bottom: 1.75rem; }
+  .result-class-header {
+    display: flex; align-items: center; justify-content: space-between; gap: .75rem;
+    flex-wrap: wrap; margin-bottom: .8rem; padding-bottom: .6rem;
+    border-bottom: 2px solid var(--navy);
+  }
+  .result-class-header h3 { font-family: 'Sora', sans-serif; font-size: 1rem; font-weight: 800; color: var(--navy); }
+  .result-class-count { font-size: .76rem; color: var(--muted); }
+
+  /* ── Withheld / seized result styling ── */
+  .result-card-withheld { border-color: var(--danger); background: linear-gradient(180deg, var(--danger-bg) 0%, #fff 60px); }
+  .result-withheld-ribbon {
+    background: var(--danger); color: #fff; font-size: .68rem; font-weight: 800;
+    padding: 3px 9px; border-radius: 20px; align-self: flex-start; letter-spacing: .2px;
+  }
+  .result-card-actions { display: flex; gap: .4rem; border-top: 1px dashed var(--border); padding-top: .55rem; margin-top: -.1rem; }
+  .result-card-actions .btn { flex: 1; justify-content: center; }
 
   /* ── Print-only report card ── */
   #rc-print-area { display: none; }
@@ -10212,13 +10363,17 @@ let _admSettings    = {};
 let _admNextTerm    = '';
 let _admCardData    = [];   // [{student, results, avg, grade, totalScore}]
 let _admCurrentCard = null;
+let _currentFilteredResultCards = []; // mirrors the on-screen filtered list, used by the bulk comment modal
+let _admWithheldMap  = {};  // { studentId: { withheld:true, reason:'', withheldAt, withheldBy } }
+let _admWithholdTarget = null; // studentId currently being withheld/released via the modal
 
 async function renderExamsPage() {
   try {
-    [_admAllStudents, _admAllResults, _admSettings] = await Promise.all([
+    [_admAllStudents, _admAllResults, _admSettings, _admWithheldMap] = await Promise.all([
       SMA.getStudents(),
       _loadAllStudentResults(),
       SMA.getSettings(),
+      _loadWithheldResultsMap(),
     ]);
     _admNextTerm = _admSettings.nextTermDate || _admSettings.nextTermLabel || '';
 
@@ -10239,7 +10394,8 @@ async function renderExamsPage() {
       const totalScore = results.reduce((sum, r) => sum + (r.total||0), 0);
       const avg = results.length ? (totalScore / results.length) : 0;
       const grade = gradeAdm(avg);
-      return { student: s, results, totalScore, avg: avg.toFixed(1), grade };
+      const wh = _admWithheldMap[s.id] || null;
+      return { student: s, results, totalScore, avg: avg.toFixed(1), grade, withheld: !!(wh && wh.withheld), withholdInfo: wh };
     }).filter(d => d.results.length > 0);
 
     // Stats
@@ -10255,6 +10411,7 @@ async function renderExamsPage() {
     if (sv('rs-atRisk'))        sv('rs-atRisk').textContent = atRisk;
 
     renderResultCards(_admCardData);
+    _currentFilteredResultCards = _admCardData;
   } catch(e) {
     console.error('renderExamsPage', e);
     const c = document.getElementById('resultCardsContainer');
@@ -10272,6 +10429,75 @@ async function _loadAllStudentResults() {
   } catch(e) { return {}; }
 }
 
+/* ── Withheld results (results seized from a student's view) ──
+   Stored as config/withheldResults = { [studentId]: { withheld, reason, withheldAt, withheldBy } }
+   This is independent of the global "resultsReleased" flag: a student's result
+   stays hidden even after release if they're individually withheld. */
+async function _loadWithheldResultsMap() {
+  try {
+    const db = firebase.firestore();
+    const snap = await db.collection('config').doc('withheldResults').get();
+    return snap.exists ? (snap.data() || {}) : {};
+  } catch(e) { console.warn('_loadWithheldResultsMap', e); return {}; }
+}
+async function _saveWithheldEntry(studentId, entry) {
+  try {
+    const db = firebase.firestore();
+    if (entry) {
+      await db.collection('config').doc('withheldResults').set({ [studentId]: entry }, { merge: true });
+    } else {
+      // Release: remove the key entirely
+      await db.collection('config').doc('withheldResults').set(
+        { [studentId]: firebase.firestore.FieldValue.delete() }, { merge: true }
+      );
+    }
+    return true;
+  } catch(e) { console.error('_saveWithheldEntry', e); return false; }
+}
+
+function _buildResultCardHTML(d, i) {
+  const s = d.student;
+  const fullName = `${s.firstName||''} ${s.lastName||''}`.trim();
+  const initials = `${(s.firstName||'')[0]||''}${(s.lastName||'')[0]||''}`.toUpperCase();
+  const colors = ['#b13434','#059669','#7c3aed','#0d9488','#d81717','#d97706'];
+  const bg = colors[i % colors.length];
+  const subjectList = d.results.map(r => r.subject||'').filter(Boolean).slice(0, 6);
+  const meta = d.results[0] || {};
+  const dateStr = meta.date || '';
+  const teacherName = meta.teacherName || s.classTeacher || '';
+  const termLabel = _admSettings.term || 'Current Term';
+  const isWithheld = !!d.withheld;
+
+  return `<div class="result-card${isWithheld ? ' result-card-withheld' : ''}" data-student-id="${s.id}" onclick="openResultDetail('${s.id}')">
+    ${isWithheld ? `<div class="result-withheld-ribbon">🔒 Withheld from student</div>` : ''}
+    <div class="result-card-top">
+      <div>
+        <div style="display:flex;align-items:center;gap:.6rem">
+          <div style="width:38px;height:38px;border-radius:50%;background:${bg};display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:800;color:#fff;flex-shrink:0">${initials}</div>
+          <div>
+            <div class="result-card-name">${fullName}</div>
+            <div class="result-card-meta">${s.class||'—'} &nbsp;·&nbsp; ${d.results.length} subject${d.results.length!==1?'s':''}</div>
+          </div>
+        </div>
+      </div>
+      <div class="result-card-grade ${gradeChip(d.grade)}">${d.grade}</div>
+    </div>
+    <div class="result-subject-pills">
+      ${subjectList.map(subj => `<span class="result-subj-pill">${subj}</span>`).join('')}
+      ${d.results.length > 6 ? `<span class="result-subj-pill">+${d.results.length-6} more</span>` : ''}
+    </div>
+    <div class="result-card-footer">
+      <span>Total: <strong>${d.totalScore}</strong> &nbsp;·&nbsp; Avg: <strong>${d.avg}%</strong></span>
+      <span>${dateStr ? '📅 ' + new Date(dateStr).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : (termLabel)}</span>
+    </div>
+    ${teacherName ? `<div style="font-size:.72rem;color:var(--muted);border-top:1px solid var(--border);padding-top:.4rem;margin-top:-.2rem">👩‍🏫 ${teacherName}</div>` : ''}
+    <div class="result-card-actions" onclick="event.stopPropagation()">
+      <button class="btn btn-outline btn-xs" onclick="downloadResultPDF('${s.id}')">⬇ PDF</button>
+      <button class="btn btn-xs ${isWithheld ? 'btn-green' : 'btn-danger'}" onclick="openWithholdModal('${s.id}')">${isWithheld ? '🔓 Release' : '🔒 Withhold'}</button>
+    </div>
+  </div>`;
+}
+
 function renderResultCards(data) {
   const cont = document.getElementById('resultCardsContainer');
   if (!cont) return;
@@ -10279,45 +10505,29 @@ function renderResultCards(data) {
     cont.innerHTML = `<div style="text-align:center;padding:3rem;color:var(--muted)"><div style="font-size:2.5rem;margin-bottom:.5rem">📭</div><div style="font-weight:600">No results published yet.</div><div style="font-size:.82rem;margin-top:.4rem">When subject teachers submit results, they'll appear here.</div></div>`;
     return;
   }
-  const settings = _admSettings;
-  const termLabel = settings.term || 'Current Term';
-  const session   = settings.session || '';
 
-  cont.innerHTML = `<div class="result-cards-grid">${data.map((d, i) => {
-    const s = d.student;
-    const fullName = `${s.firstName||''} ${s.lastName||''}`.trim();
-    const initials = `${(s.firstName||'')[0]||''}${(s.lastName||'')[0]||''}`.toUpperCase();
-    const colors = ['#b13434','#059669','#7c3aed','#0d9488','#d81717','#d97706'];
-    const bg = colors[i % colors.length];
-    const subjectList = d.results.map(r => r.subject||'').filter(Boolean).slice(0, 6);
-    const meta = d.results[0] || {};
-    const dateStr = meta.date || '';
-    const teacherName = meta.teacherName || s.classTeacher || '';
+  // ── Group results class-by-class ──
+  const groups = {};
+  data.forEach(d => {
+    const cls = d.student.class || 'Unassigned';
+    (groups[cls] = groups[cls] || []).push(d);
+  });
+  const classNames = Object.keys(groups).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
 
-    return `<div class="result-card" data-student-id="${s.id}" onclick="openResultDetail('${s.id}')">
-      <div class="result-card-top">
+  cont.innerHTML = classNames.map(cls => {
+    const list = groups[cls];
+    const withheldCount = list.filter(d => d.withheld).length;
+    return `<div class="result-class-group">
+      <div class="result-class-header">
         <div>
-          <div style="display:flex;align-items:center;gap:.6rem">
-            <div style="width:38px;height:38px;border-radius:50%;background:${bg};display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:800;color:#fff;flex-shrink:0">${initials}</div>
-            <div>
-              <div class="result-card-name">${fullName}</div>
-              <div class="result-card-meta">${s.class||'—'} &nbsp;·&nbsp; ${d.results.length} subject${d.results.length!==1?'s':''}</div>
-            </div>
-          </div>
+          <h3>🏫 ${cls}</h3>
+          <span class="result-class-count">${list.length} student${list.length!==1?'s':''} with results${withheldCount ? ` &nbsp;·&nbsp; <span style="color:var(--danger)">🔒 ${withheldCount} withheld</span>` : ''}</span>
         </div>
-        <div class="result-card-grade ${gradeChip(d.grade)}">${d.grade}</div>
+        <button class="btn btn-crimson btn-sm" onclick="downloadClassResultsPDF('${cls.replace(/'/g,"\\'")}')">⬇ Download Class PDF</button>
       </div>
-      <div class="result-subject-pills">
-        ${subjectList.map(subj => `<span class="result-subj-pill">${subj}</span>`).join('')}
-        ${d.results.length > 6 ? `<span class="result-subj-pill">+${d.results.length-6} more</span>` : ''}
-      </div>
-      <div class="result-card-footer">
-        <span>Total: <strong>${d.totalScore}</strong> &nbsp;·&nbsp; Avg: <strong>${d.avg}%</strong></span>
-        <span>${dateStr ? '📅 ' + new Date(dateStr).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : (termLabel)}</span>
-      </div>
-      ${teacherName ? `<div style="font-size:.72rem;color:var(--muted);border-top:1px solid var(--border);padding-top:.4rem;margin-top:-.2rem">👩‍🏫 ${teacherName}</div>` : ''}
+      <div class="result-cards-grid">${list.map((d, i) => _buildResultCardHTML(d, i)).join('')}</div>
     </div>`;
-  }).join('')}</div>`;
+  }).join('');
 
   // Click handlers are attached as inline onclick on each card above
 }
@@ -10333,8 +10543,11 @@ function filterResultCards() {
     const matchTerm   = !term || d.results.some(r => !r.term || String(r.term) === term);
     return matchSearch && matchClass && matchTerm;
   });
+  _currentFilteredResultCards = filtered;
   renderResultCards(filtered);
 }
+
+let _admCurrentAvatarDataUrl = null;
 
 async function openResultDetail(studentId) {
   try {
@@ -10345,8 +10558,15 @@ async function openResultDetail(studentId) {
     // Fetch avatar BEFORE building HTML so it renders inline immediately (also fixes print)
     let avatarDataUrl = null;
     try { avatarDataUrl = await SMA.getAvatar(s.id); } catch(e) { console.warn('Avatar fetch failed:', e); }
+    _admCurrentAvatarDataUrl = avatarDataUrl;
     document.getElementById('rdm-title').textContent = `📋 ${fullName} — Result Sheet`;
     document.getElementById('rdm-body').innerHTML = buildReportCardHTML(_admCurrentCard, _admSettings, avatarDataUrl);
+    const whBtn = document.getElementById('rdm-withhold-btn');
+    if (whBtn) {
+      const isWithheld = !!_admCurrentCard.withheld;
+      whBtn.textContent = isWithheld ? '🔓 Release' : '🔒 Withhold';
+      whBtn.className = 'btn btn-sm ' + (isWithheld ? 'btn-green' : 'btn-outline');
+    }
     document.getElementById('resultDetailModal').classList.add('open');
   } catch(e) {
     console.error('openResultDetail error:', e);
@@ -10356,6 +10576,149 @@ async function openResultDetail(studentId) {
 function closeResultDetailModal() {
   document.getElementById('resultDetailModal').classList.remove('open');
   _admCurrentCard = null;
+  _admCurrentAvatarDataUrl = null;
+}
+
+/* ═══════════════════════════════════════════
+   WITHHOLD / SEIZE A STUDENT'S RESULT
+   Stored in config/withheldResults, independent of the global release flag.
+   ═══════════════════════════════════════════ */
+function openWithholdModal(studentId) {
+  const id = studentId || (_admCurrentCard && _admCurrentCard.student.id);
+  if (!id) return;
+  const card = _admCardData.find(d => String(d.student.id) === String(id));
+  if (!card) { showToast('Student not found.', 'error'); return; }
+  _admWithholdTarget = id;
+  const fullName = `${card.student.firstName||''} ${card.student.lastName||''}`.trim();
+  const isWithheld = !!card.withheld;
+
+  document.getElementById('withholdModalTitle').textContent = isWithheld ? `🔓 Release ${fullName}'s Result` : `🔒 Withhold ${fullName}'s Result`;
+  document.getElementById('withholdModalSub').textContent = isWithheld
+    ? 'Releasing will let the student view and print their result again.'
+    : 'The student will see their result as seized/withheld until you release it.';
+
+  document.getElementById('withholdModalReleaseView').style.display  = isWithheld ? 'block' : 'none';
+  document.getElementById('withholdModalWithholdView').style.display = isWithheld ? 'none'  : 'block';
+  document.getElementById('withholdConfirmBtn').style.display = isWithheld ? 'none' : 'inline-flex';
+  document.getElementById('withholdReleaseBtn').style.display = isWithheld ? 'inline-flex' : 'none';
+
+  if (isWithheld) {
+    const reason = (card.withholdInfo && card.withholdInfo.reason) || '';
+    document.getElementById('withholdReasonDisplay').textContent = reason || '(no reason given)';
+  } else {
+    document.getElementById('withholdReasonInput').value = '';
+  }
+  document.getElementById('withholdModal').classList.add('open');
+}
+function closeWithholdModal() {
+  document.getElementById('withholdModal').classList.remove('open');
+  _admWithholdTarget = null;
+}
+async function confirmWithhold() {
+  if (!_admWithholdTarget) return;
+  const reason = (document.getElementById('withholdReasonInput').value || '').trim();
+  if (!reason) { showToast('Please give a reason for withholding this result.', 'error'); return; }
+  const entry = { withheld: true, reason, withheldAt: new Date().toISOString(), withheldBy: (window.currentAdminName || 'Admin') };
+  const ok = await _saveWithheldEntry(_admWithholdTarget, entry);
+  if (!ok) { showToast('Failed to withhold result. Try again.', 'error'); return; }
+  _admWithheldMap[_admWithholdTarget] = entry;
+  const card = _admCardData.find(d => String(d.student.id) === String(_admWithholdTarget));
+  if (card) { card.withheld = true; card.withholdInfo = entry; }
+  closeWithholdModal();
+  showToast('🔒 Result withheld — the student will see it as seized.', 'success');
+  if (typeof filterResultCards === 'function') filterResultCards(); else renderResultCards(_admCardData);
+  const whBtn = document.getElementById('rdm-withhold-btn');
+  if (whBtn && _admCurrentCard && String(_admCurrentCard.student.id) === String(_admWithholdTarget)) {
+    whBtn.textContent = '🔓 Release'; whBtn.className = 'btn btn-sm btn-green';
+  }
+}
+async function confirmReleaseWithhold() {
+  if (!_admWithholdTarget) return;
+  const ok = await _saveWithheldEntry(_admWithholdTarget, null);
+  if (!ok) { showToast('Failed to release result. Try again.', 'error'); return; }
+  delete _admWithheldMap[_admWithholdTarget];
+  const card = _admCardData.find(d => String(d.student.id) === String(_admWithholdTarget));
+  if (card) { card.withheld = false; card.withholdInfo = null; }
+  closeWithholdModal();
+  showToast('🔓 Result released back to the student.', 'success');
+  if (typeof filterResultCards === 'function') filterResultCards(); else renderResultCards(_admCardData);
+  const whBtn = document.getElementById('rdm-withhold-btn');
+  if (whBtn && _admCurrentCard && String(_admCurrentCard.student.id) === String(_admWithholdTarget)) {
+    whBtn.textContent = '🔒 Withhold'; whBtn.className = 'btn btn-sm btn-outline';
+  }
+}
+
+/* ═══════════════════════════════════════════
+   PDF DOWNLOADS (single student & whole class)
+   Uses html2pdf.js (bundles jsPDF + html2canvas) against the same
+   report-card markup used for the on-screen preview/print.
+   ═══════════════════════════════════════════ */
+async function downloadResultPDF(studentId) {
+  const id = studentId || (_admCurrentCard && _admCurrentCard.student.id);
+  if (!id) return;
+  if (typeof html2pdf === 'undefined') { showToast('PDF library failed to load. Check your connection.', 'error'); return; }
+  const card = _admCardData.find(d => String(d.student.id) === String(id));
+  if (!card) { showToast('Result not found for this student.', 'error'); return; }
+  showToast('Preparing PDF…', 'success');
+  let avatarDataUrl = (_admCurrentCard && String(_admCurrentCard.student.id) === String(id)) ? _admCurrentAvatarDataUrl : null;
+  if (avatarDataUrl === null) { try { avatarDataUrl = await SMA.getAvatar(id); } catch(e) {} }
+  const fullName = `${card.student.firstName||''} ${card.student.lastName||''}`.trim();
+  const wrap = document.createElement('div');
+  wrap.style.cssText = "position:fixed;left:-9999px;top:0;font-family:'Segoe UI',Arial,sans-serif;font-size:12.5px;color:#111;width:190mm;background:#fff";
+  wrap.innerHTML = buildReportCardHTML(card, _admSettings, avatarDataUrl, false);
+  document.body.appendChild(wrap);
+  try {
+    await html2pdf().set({
+      margin: 8,
+      filename: `${fullName.replace(/\s+/g,'_')}_Result.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    }).from(wrap).save();
+  } catch(e) {
+    console.error('downloadResultPDF', e);
+    showToast('Failed to generate PDF.', 'error');
+  } finally {
+    document.body.removeChild(wrap);
+  }
+}
+
+async function downloadClassResultsPDF(className) {
+  if (typeof html2pdf === 'undefined') { showToast('PDF library failed to load. Check your connection.', 'error'); return; }
+  const list = _admCardData.filter(d => (d.student.class || 'Unassigned') === className);
+  if (!list.length) { showToast('No results found for this class.', 'error'); return; }
+  showToast(`Preparing ${className} results PDF…`, 'success');
+
+  const wrap = document.createElement('div');
+  wrap.style.cssText = "position:fixed;left:-9999px;top:0;font-family:'Segoe UI',Arial,sans-serif;font-size:12.5px;color:#111;width:190mm;background:#fff";
+
+  for (let i = 0; i < list.length; i++) {
+    const card = list[i];
+    let avatarDataUrl = null;
+    try { avatarDataUrl = await SMA.getAvatar(card.student.id); } catch(e) {}
+    const page = document.createElement('div');
+    if (i > 0) page.style.pageBreakBefore = 'always';
+    page.innerHTML = (card.withheld
+      ? `<div style="background:#fee2e2;color:#991b1b;font-weight:800;font-size:11px;padding:4px 8px;border-radius:6px;margin-bottom:4px;text-align:center">🔒 THIS RESULT IS CURRENTLY WITHHELD FROM THE STUDENT</div>`
+      : '') + buildReportCardHTML(card, _admSettings, avatarDataUrl, false);
+    wrap.appendChild(page);
+  }
+  document.body.appendChild(wrap);
+  try {
+    await html2pdf().set({
+      margin: 8,
+      filename: `${className.replace(/\s+/g,'_')}_Class_Results.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak: { mode: ['css'] }
+    }).from(wrap).save();
+  } catch(e) {
+    console.error('downloadClassResultsPDF', e);
+    showToast('Failed to generate class PDF.', 'error');
+  } finally {
+    document.body.removeChild(wrap);
+  }
 }
 
 async function saveProprietressComment() {
@@ -10372,11 +10735,11 @@ async function saveProprietressComment() {
     const records = allResults[studentId] || [];
 
     // Write proprietressComment into every result record for this student
-    allResults[studentId] = records.map(r => ({ ...r, proprietressComment: comment }));
+    allResults[studentId] = records.map(r => ({ ...r, proprietressComment: comment, proprietressCommentSource: 'custom' }));
     await db.collection('config').doc('results').set(allResults);
 
     // Update in-memory card so re-renders are consistent
-    _admCurrentCard.results = _admCurrentCard.results.map(r => ({ ...r, proprietressComment: comment }));
+    _admCurrentCard.results = _admCurrentCard.results.map(r => ({ ...r, proprietressComment: comment, proprietressCommentSource: 'custom' }));
 
     // Visual feedback
     ta.style.background = '#ecfdf5';
@@ -10385,6 +10748,84 @@ async function saveProprietressComment() {
     showToast('✅ Proprietress comment saved', 'success');
   } catch(e) {
     showToast('Failed to save: ' + e.message, 'error');
+  }
+}
+
+/* ── Bulk Proprietress/Principal Comment (apply to many students at once) ── */
+function _bulkCommentTargetList() {
+  const scope = document.getElementById('bulkCommentScope')?.value || 'filtered';
+  const skipCustom = document.getElementById('bulkCommentSkipCustom')?.checked;
+  const base = scope === 'all' ? _admCardData : (_currentFilteredResultCards || _admCardData);
+  const targets = skipCustom
+    ? base.filter(d => (d.results[0] || {}).proprietressCommentSource !== 'custom')
+    : base;
+  return { base, targets };
+}
+
+function updateBulkCommentCountPreview() {
+  const el = document.getElementById('bulkCommentCountPreview');
+  if (!el) return;
+  const { base, targets } = _bulkCommentTargetList();
+  if (!base.length) {
+    el.textContent = 'No students match this scope.';
+    return;
+  }
+  el.textContent = targets.length === base.length
+    ? `Will apply to all ${targets.length} student${targets.length!==1?'s':''} in this scope.`
+    : `Will apply to ${targets.length} of ${base.length} student${base.length!==1?'s':''} (skipping ${base.length-targets.length} with their own comment already set).`;
+}
+
+function openBulkCommentModal() {
+  document.getElementById('bulkCommentText').value = '';
+  document.getElementById('bulkCommentSkipCustom').checked = false;
+  document.getElementById('bulkCommentScope').value = 'filtered';
+  updateBulkCommentCountPreview();
+  document.getElementById('bulkCommentModal').classList.add('open');
+}
+function closeBulkCommentModal() {
+  document.getElementById('bulkCommentModal').classList.remove('open');
+}
+
+async function applyBulkComment() {
+  const comment = document.getElementById('bulkCommentText').value.trim();
+  if (!comment) { showToast('Please enter a comment to apply', 'error'); return; }
+
+  const { targets } = _bulkCommentTargetList();
+  if (!targets.length) { showToast('No students match this scope — nothing to apply.', 'error'); return; }
+
+  const scopeLabel = document.getElementById('bulkCommentScope').value === 'all' ? 'all students with results' : 'the currently filtered students';
+  if (!confirm(`Apply this comment to ${targets.length} student${targets.length!==1?'s':''} (${scopeLabel})?\n\nYou can still open any individual student's result sheet afterward to give them a different comment.`)) return;
+
+  const btn = document.getElementById('bulkCommentApplyBtn');
+  btn.disabled = true;
+  btn.textContent = 'Applying…';
+
+  try {
+    const db = firebase.firestore();
+    const snap = await db.collection('config').doc('results').get();
+    const allResults = snap.exists ? (snap.data() || {}) : {};
+
+    targets.forEach(d => {
+      const studentId = d.student.id;
+      const records = allResults[studentId] || [];
+      allResults[studentId] = records.map(r => ({ ...r, proprietressComment: comment, proprietressCommentSource: 'bulk' }));
+    });
+    await db.collection('config').doc('results').set(allResults);
+
+    // Keep in-memory card data consistent so the UI reflects the change immediately.
+    const targetIds = new Set(targets.map(d => String(d.student.id)));
+    _admCardData = _admCardData.map(d => targetIds.has(String(d.student.id))
+      ? { ...d, results: d.results.map(r => ({ ...r, proprietressComment: comment, proprietressCommentSource: 'bulk' })) }
+      : d);
+
+    closeBulkCommentModal();
+    if (typeof filterResultCards === 'function') filterResultCards(); else renderResultCards(_admCardData);
+    showToast(`✅ Comment applied to ${targets.length} student${targets.length!==1?'s':''}`, 'success');
+  } catch(e) {
+    showToast('Failed to apply comment: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '📤 Apply Comment';
   }
 }
 
