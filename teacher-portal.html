@@ -10431,9 +10431,9 @@ async function declineDeleteRequest(docId, studentId, itemType) {
   }
 }
 
- ══ SESSION RESTORE — re-hydrate on page refresh ══
-   Runs after SMA is defined. Restores the last logged-in teacher from
-   sessionStorage so a page refresh doesn't force a full re-login.        
+// ══ SESSION RESTORE — re-hydrate on page refresh ══
+// Runs after SMA is defined. Restores the last logged-in teacher from
+// sessionStorage so a page refresh doesn't force a full re-login.
 (async function restoreSession() {
   const raw = sessionStorage.getItem('sma_teacher');
   if (!raw) return;
