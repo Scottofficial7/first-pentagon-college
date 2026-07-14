@@ -3222,7 +3222,9 @@ function buildTeacherDisplay(t) {
     type,
     classes,
     subjects,
-    role: t.role || (isSecondary ? 'Subject Teacher – Secondary' : `Class Teacher – ${section}`),
+    role: t.role || (isSecondary
+      ? (t.classTeacherOf ? `Subject Teacher – Secondary (Class Teacher, ${t.classTeacherOf})` : 'Subject Teacher – Secondary')
+      : `Class Teacher – ${section}`),
     email: t.email || '',
     phone: t.phone || '',
     yearsExp: t.yearsExp || '',
@@ -5183,7 +5185,12 @@ async function renderStudents() {
 
   classesToShow.forEach(cls => {
     const students = STUDENTS[cls] || [];
-    const isPrimary = PRIMARY_CLASSES.includes(cls);
+    // A secondary (subject) teacher normally only gets the simple roster table
+    // below for every class they teach. But if the admin marked them as the
+    // Class Teacher for one specific class (t.classTeacherOf), that one class
+    // gets the same full profile view — attendance, subjects, grades/domains
+    // shortcuts — as a primary/nursery class teacher gets for their class.
+    const isPrimary = PRIMARY_CLASSES.includes(cls) || (t.classTeacherOf && t.classTeacherOf === cls);
 
     if (isPrimary) {
       // ── RICH PRIMARY SCHOOL SECTION ──────────────────────────────────
@@ -5316,7 +5323,7 @@ async function renderStudents() {
                       <div style="font-size:.72rem;color:var(--muted);margin-top:2px">
                         <span style="background:#ffdada;color:#b45309;border:1px solid rgba(180,83,9,.18);
                                      padding:1px 7px;border-radius:20px;font-weight:700;font-size:.65rem">
-                          ✏️ Primary
+                          ✏️ ${getClassSectionLabel(cls)}
                         </span>
                         &nbsp;#${i+1}
                       </div>

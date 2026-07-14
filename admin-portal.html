@@ -2834,6 +2834,15 @@
         <div id="etnSubjectClassesPills" style="display:flex;flex-wrap:wrap;gap:.5rem"></div>
         <div style="font-size:.72rem;color:var(--muted);margin-top:.35rem">Select every class this teacher takes this subject in — across JSS 1 to SSS 3.</div>
       </div>
+      <!-- Class Teacher Of (Secondary teachers only) — see registration modal
+           for the full rationale. -->
+      <div class="form-group" id="etnClassTeacherGroup" style="display:none">
+        <label class="form-label">Class Teacher Of <span style="font-size:.7rem;font-weight:400;color:var(--muted)">(optional)</span></label>
+        <select class="form-control" id="etnClassTeacherOf">
+          <option value="">Not a class teacher</option>
+        </select>
+        <div style="font-size:.72rem;color:var(--muted);margin-top:.35rem">If this teacher is the form/class teacher for one of the classes above, select it here — they'll get full student profile access for that class, not just the subject gradebook.</div>
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal('editTeacherNameModal')">Cancel</button>
@@ -2921,6 +2930,19 @@
         <label class="form-label">Subject Classes <span>*</span></label>
         <div id="tSubjectClassesPills" style="display:flex;flex-wrap:wrap;gap:.5rem"></div>
         <div style="font-size:.72rem;color:var(--muted);margin-top:.35rem">Select every class this teacher takes this subject in — across JSS 1 to SSS 3.</div>
+      </div>
+
+      <!-- Class Teacher Of (Secondary teachers only) — a subject teacher can
+           additionally be the form/class teacher for ONE of the classes picked
+           above. That flag is what unlocks full student-profile access for
+           that specific class in the Teacher Portal, instead of just the
+           subject gradebook view every subject teacher gets. -->
+      <div class="form-group" id="tClassTeacherGroup" style="display:none">
+        <label class="form-label">Class Teacher Of <span style="font-size:.7rem;font-weight:400;color:var(--muted)">(optional)</span></label>
+        <select class="form-control" id="tClassTeacherOf">
+          <option value="">Not a class teacher</option>
+        </select>
+        <div style="font-size:.72rem;color:var(--muted);margin-top:.35rem">If this teacher is the form/class teacher for one of the classes above, select it here — they'll get full student profile access for that class, not just the subject gradebook.</div>
       </div>
 
       <!-- Contact row -->
@@ -5260,7 +5282,7 @@ async function renderTeachersTable(data) {
     <tr>
       <td><div class="td-name"><div class="td-avatar" style="background:${avatarColor(nm)}">${initials(nm)}</div><div><div style="font-weight:700;font-size:.85rem">${nm}</div><div style="font-size:.73rem;color:var(--muted)">${t.email||''}</div></div></div></td>
       <td><code style="font-family:'DM Mono',monospace;font-size:.82rem;background:var(--bg);padding:2px 7px;border-radius:5px">${t.username}</code></td>
-      <td><span class="badge ${teacherTypeInfo(t.type).badge}">${teacherTypeInfo(t.type).icon} ${teacherTypeInfo(t.type).label}</span></td>
+      <td><span class="badge ${teacherTypeInfo(t.type).badge}">${teacherTypeInfo(t.type).icon} ${teacherTypeInfo(t.type).label}</span>${t.classTeacherOf ? `<br><span class="badge badge-success" style="margin-top:4px;font-size:.65rem" title="Full student profile access for ${t.classTeacherOf}">🎓 Class Teacher · ${t.classTeacherOf}</span>` : ''}</td>
       <td style="font-size:.82rem;max-width:180px" title="${subStr}">${subDisplay||'—'}</td>
       <td>${t.class||'—'}</td>
       <td>${statusBadge(t.status)}</td>
@@ -5291,7 +5313,7 @@ async function renderTeachersTable(data) {
         <div class="tch-card-info">
           <div class="tch-card-name">${nm}</div>
           <div class="tch-card-meta">${t.email || t.username}</div>
-          <div class="tch-card-badges">${typeBadge} ${statusBadge(t.status)}</div>
+          <div class="tch-card-badges">${typeBadge} ${statusBadge(t.status)}${t.classTeacherOf ? ` <span class="badge badge-success" style="font-size:.65rem">🎓 Class Teacher · ${t.classTeacherOf}</span>` : ''}</div>
         </div>
         <div class="tch-card-menu">
           <button class="btn btn-xs btn-primary" onclick="viewTeacherProfile('${t.id}')">👁 Profile</button>
@@ -5322,11 +5344,15 @@ async function openEditTeacherName(id) {
   const isSecondary = t.type === 'secondary';
   document.getElementById('etnClassGroup').style.display = isSecondary ? 'none' : '';
   document.getElementById('etnSubjectClassesGroup').style.display = isSecondary ? '' : 'none';
+  document.getElementById('etnClassTeacherGroup').style.display = isSecondary ? '' : 'none';
 
   if (isSecondary) {
     // Subject Classes: multi-select across JSS1–SSS3, shown for every
     // secondary teacher — including ones who already have an assigned class.
     renderSubjectClassPills('etnSubjectClassesPills', t.classes || (t.class && t.class !== '—' ? [t.class] : []));
+    // renderSubjectClassPills already rebuilt the Class Teacher Of options from
+    // the checked pills above — now restore this teacher's existing selection.
+    document.getElementById('etnClassTeacherOf').value = t.classTeacherOf || '';
   } else {
     const classSel = document.getElementById('etnClass');
     const currentClass = (t.classes && t.classes[0]) || t.class || '';
@@ -5351,6 +5377,11 @@ async function saveTeacherNameEdit() {
   if (isSecondary && !subjectClasses.length) { showToast('Select at least one subject class','error'); return; }
   const assignedClass = isSecondary ? '' : (document.getElementById('etnClass').value || '');
   const classesArr = isSecondary ? subjectClasses : (assignedClass ? [assignedClass] : []);
+  // Class Teacher Of only applies to secondary teachers, and only for a class
+  // still among their checked Subject Classes (the dropdown already enforces
+  // this, but re-check here in case of a stale value).
+  const classTeacherOf = isSecondary ? (document.getElementById('etnClassTeacherOf').value || '') : '';
+  if (classTeacherOf && !classesArr.includes(classTeacherOf)) { showToast('Class Teacher Of must be one of the selected Subject Classes','error'); return; }
 
   const teachers = await SMA.getTeachers();
   const before = teachers.find(x => x.id === id);
@@ -5359,6 +5390,7 @@ async function saveTeacherNameEdit() {
     firstName: fn, lastName: ln,
     class: classesArr[0] || '—',
     classes: classesArr,
+    classTeacherOf,
   }, { forceSync: nameChanged });
   await SMA.logActivity(`Teacher updated: ${fn} ${ln}${classesArr.length ? ' – ' + classesArr.join(', ') : ''}`, '✏️', 'info');
   closeModal('editTeacherNameModal');
@@ -5415,11 +5447,35 @@ function renderSubjectClassPills(containerId, checkedClasses) {
   const checked = checkedClasses || [];
   container.innerHTML = TSC_SECONDARY_CLASSES.map(cls => `
     <label style="display:flex;align-items:center;gap:.4rem;font-size:.82rem;cursor:pointer;background:var(--bg);padding:4px 10px;border-radius:20px;border:1px solid var(--border)">
-      <input type="checkbox" class="${containerId}-check" data-cls="${cls}" ${checked.includes(cls)?'checked':''} style="accent-color:var(--navy)"> ${cls}
+      <input type="checkbox" class="${containerId}-check" data-cls="${cls}" ${checked.includes(cls)?'checked':''} style="accent-color:var(--navy)" onchange="onSubjectClassPillsChange('${containerId}')"> ${cls}
     </label>`).join('');
+  onSubjectClassPillsChange(containerId);
 }
 function getCheckedSubjectClasses(containerId) {
   return [...document.querySelectorAll(`.${containerId}-check:checked`)].map(cb => cb.dataset.cls);
+}
+
+// Maps each "Subject Classes" pill container to the paired "Class Teacher Of"
+// <select> beside it, so a secondary teacher can only be marked class teacher
+// of a class they're actually already assigned to teach.
+const SUBJECT_CLASS_TEACHER_SELECT = {
+  tSubjectClassesPills: 'tClassTeacherOf',
+  etnSubjectClassesPills: 'etnClassTeacherOf',
+};
+// Rebuilds the "Class Teacher Of" dropdown options to match whichever Subject
+// Classes pills are currently checked, preserving the existing selection if
+// it's still one of the checked classes (and clearing it otherwise, since a
+// teacher can't be class teacher of a class they're no longer assigned to).
+function onSubjectClassPillsChange(containerId) {
+  const selectId = SUBJECT_CLASS_TEACHER_SELECT[containerId];
+  if (!selectId) return;
+  const select = document.getElementById(selectId);
+  if (!select) return;
+  const checkedClasses = getCheckedSubjectClasses(containerId);
+  const prevValue = select.value;
+  select.innerHTML = '<option value="">Not a class teacher</option>' +
+    checkedClasses.map(c => `<option value="${c}" ${c===prevValue?'selected':''}>${c}</option>`).join('');
+  if (prevValue && !checkedClasses.includes(prevValue)) select.value = '';
 }
 
 function onTeacherTypeChange() {
@@ -5436,7 +5492,9 @@ function onTeacherTypeChange() {
   const isSecondary = type === 'secondary';
   document.getElementById('tClassGroup').style.display = isSecondary ? 'none' : '';
   document.getElementById('tSubjectClassesGroup').style.display = isSecondary ? '' : 'none';
+  document.getElementById('tClassTeacherGroup').style.display = isSecondary ? '' : 'none';
   if (isSecondary) renderSubjectClassPills('tSubjectClassesPills', []);
+  else document.getElementById('tClassTeacherOf').value = '';
 }
 
 function openRegTeacherModal() {
@@ -5464,6 +5522,11 @@ async function registerTeacher() {
   if (isSecondary && !subjectClasses.length) { showToast('Select at least one subject class','error'); return; }
   const assignedClass = document.getElementById('tClass').value || '';
   const classesArr = isSecondary ? subjectClasses : (assignedClass ? [assignedClass] : []);
+  // Class Teacher Of only applies to secondary teachers, and only for a class
+  // still among their checked Subject Classes (the dropdown already enforces
+  // this, but re-check here in case of a stale value).
+  const classTeacherOf = isSecondary ? (document.getElementById('tClassTeacherOf').value || '') : '';
+  if (classTeacherOf && !classesArr.includes(classTeacherOf)) { showToast('Class Teacher Of must be one of the selected Subject Classes','error'); return; }
   const teacher = await SMA.addTeacher({
     firstName: fn, lastName: ln, type,
     subjects: document.getElementById('tSubjects').value.split(',').map(s=>s.trim()).filter(Boolean),
@@ -5474,6 +5537,10 @@ async function registerTeacher() {
     // instead of just the one class actually assigned here. Secondary
     // teachers can have several classes here (their Subject Classes).
     classes: classesArr,
+    // If set, this is the ONE class (among the Subject Classes above) where
+    // this secondary teacher is also the form/class teacher — the Teacher
+    // Portal uses this to unlock full student-profile access for that class.
+    classTeacherOf,
     email: document.getElementById('tEmail').value || '',
     phone: document.getElementById('tPhone').value || '—',
     gender: document.getElementById('tGender').value || '—',
@@ -5509,6 +5576,7 @@ async function viewTeacherProfile(id) {
         <div class="profile-hero-tags">
           ${statusBadge(t.status)}
           <span class="profile-hero-tag">📚 ${(t.subjects||[]).join(', ')}</span>
+          ${t.classTeacherOf ? `<span class="badge badge-success">🎓 Class Teacher · ${t.classTeacherOf}</span>` : ''}
         </div>
       </div>
     </div>
@@ -5523,6 +5591,7 @@ async function viewTeacherProfile(id) {
         <div style="margin-bottom:.6rem"><strong>Type:</strong> ${teacherTypeInfo(t.type).full}</div>
         <div style="margin-bottom:.6rem"><strong>Assigned Class:</strong> ${t.class||'—'}</div>
         <div style="margin-bottom:.6rem"><strong>Subjects:</strong> ${(t.subjects||[]).join(', ')}</div>
+        ${t.type === 'secondary' ? `<div style="margin-bottom:.6rem"><strong>Class Teacher Of:</strong> ${t.classTeacherOf ? `${t.classTeacherOf} <span style="color:var(--muted);font-size:.75rem">(full student profile access)</span>` : '<span style="color:var(--muted)">Not a class teacher — subject gradebook access only</span>'}</div>` : ''}
         <div style="margin-bottom:.6rem"><strong>Plans Submitted:</strong> ${(await SMA.getLessonPlans()).filter(p=>p.teacherId===t.id||p.teacher===nm).length}</div>
       </div></div>
     </div>`;
