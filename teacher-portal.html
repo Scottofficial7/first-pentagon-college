@@ -6966,6 +6966,32 @@ function updateAvatar(input){
   };r.readAsDataURL(f);
 }
 
+// Lets a Class Teacher (primary class teacher, or secondary teacher with
+// classTeacherOf === this class) update a student's profile photo from the
+// Edit Student Profile modal.
+function updateStudentAvatar(input){
+  const f = input.files[0]; if (!f) return;
+  const studentId = document.getElementById('editStudentProfileId')?.value;
+  if (!studentId) { showToast('Could not identify student record.', 'error'); return; }
+
+  const r = new FileReader();
+  r.onload = async e => {
+    try {
+      const dataUrl = await compressImage(e.target.result);
+      const preview = document.getElementById('editStudentAvatarPreview');
+      if (preview) preview.innerHTML = `<img src="${dataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" alt="avatar">`;
+      await SMA.saveAvatar(studentId, dataUrl);
+      showToast('📷 Student photo updated!', 'success');
+      // Refresh the roster so the new photo shows immediately in the list.
+      if (typeof renderStudents === 'function') renderStudents();
+    } catch (err) {
+      console.error('Student avatar save failed', err);
+      showToast('Could not save photo. Please try a smaller image.', 'error');
+    }
+  };
+  r.readAsDataURL(f);
+}
+
 function _applyAvatarToSidebar(dataUrl) {
   const sb = document.getElementById('sidebarAvatar');
   if (!sb) return;
@@ -9286,6 +9312,13 @@ async function openEditStudentProfileModal(cls, studentName) {
   );
   if (!target) { showToast('Student record not found in database.', 'error'); return; }
 
+  // Photo editing is a Class Teacher privilege — either a Primary/Nursery
+  // class teacher, or a Secondary subject teacher who has been made the
+  // Class Teacher of this specific class (t.classTeacherOf).
+  const isClassTeacherHere = !!currentTeacher && (
+    PRIMARY_CLASSES.includes(cls) || currentTeacher.classTeacherOf === cls
+  );
+
   const esc = v => (v || '').toString().replace(/"/g,'&quot;');
 
   const modal = document.createElement('div');
@@ -9301,6 +9334,15 @@ async function openEditStudentProfileModal(cls, studentName) {
       </div>
       <div class="modal-body">
         <input type="hidden" id="editStudentProfileId" value="${target.id}">
+        ${isClassTeacherHere ? `
+        <div class="avatar-upload-wrap" style="margin-bottom:1.25rem">
+          <div class="avatar-large" id="editStudentAvatarPreview">${esc((target.firstName||'?')[0])}${esc((target.lastName||'')[0]||'')}</div>
+          <div>
+            <div style="font-size:.83rem;font-weight:700">Profile Photo</div>
+            <div style="font-size:.75rem;color:var(--muted);margin-top:2px">JPG or PNG, square photos look best</div>
+            <label class="btn btn-outline btn-xs" style="margin-top:.6rem;cursor:pointer">📷 Change Photo<input type="file" accept="image/*" style="display:none" onchange="updateStudentAvatar(this)"></label>
+          </div>
+        </div>` : ''}
         <div style="background:var(--info-bg,#eff6ff);border-radius:10px;padding:.65rem 1rem;font-size:.8rem;color:var(--info-text,#1e40af);margin-bottom:1rem">
           💡 Changing the name will also regenerate the student's username and default password to match it. Be sure to share the new login details with the student.
         </div>
@@ -9349,6 +9391,13 @@ async function openEditStudentProfileModal(cls, studentName) {
   document.body.appendChild(modal);
   requestAnimationFrame(() => modal.classList.add('open'));
   document.getElementById('editStudentFirstName').focus();
+
+  if (isClassTeacherHere) {
+    SMA.getAvatar(target.id).then(dataUrl => {
+      const el = document.getElementById('editStudentAvatarPreview');
+      if (el && dataUrl) el.innerHTML = `<img src="${dataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" alt="avatar">`;
+    }).catch(() => {});
+  }
 }
 
 function closeEditStudentProfileModal() {
@@ -10478,4 +10527,4 @@ async function declineDeleteRequest(docId, studentId, itemType) {
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
 <script src="sma-push-notifications.js"></script>
 </body>
-</html>
+</html>f
