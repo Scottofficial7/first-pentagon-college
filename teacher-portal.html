@@ -5222,6 +5222,7 @@ async function renderStudents() {
         return attData[todayKey] && attData[todayKey][s] === 'absent';
       }).length;
       const markedToday = presentToday + lateToday + absentToday;
+      const notMarkedToday = Math.max(students.length - markedToday, 0);
 
       html += `
       <!-- PRIMARY CLASS HEADER -->
@@ -5274,8 +5275,8 @@ async function renderStudents() {
           <div class="stat-card" style="padding:1rem">
             <div class="stat-icon" style="background:#ede9fe;width:38px;height:38px;font-size:1rem">📊</div>
             <div>
-              <div class="stat-val" style="font-size:1.35rem">${markedToday > 0 ? Math.round(presentToday/markedToday*100)+'%' : '—'}</div>
-              <div class="stat-label">${markedToday > 0 ? 'Attendance Rate' : 'Not Marked Yet'}</div>
+              <div class="stat-val" style="font-size:1.35rem">${notMarkedToday > 0 ? notMarkedToday : (markedToday > 0 ? Math.round(presentToday/markedToday*100)+'%' : '—')}</div>
+              <div class="stat-label">${notMarkedToday > 0 ? 'Not Marked Yet' : (markedToday > 0 ? 'Attendance Rate' : 'Not Marked Yet')}</div>
             </div>
           </div>
         </div>
