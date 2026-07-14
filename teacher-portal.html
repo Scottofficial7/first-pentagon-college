@@ -1046,6 +1046,7 @@
   </style>
 
 <!-- Firebase + F.P.C backend: loaded here so they are ready before app script -->
+<script src="firebase-config.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -1054,15 +1055,7 @@
 window.SMA = (() => {
 
   /* ═══════════ FIREBASE INIT ═══════════ */
-  const firebaseConfig = {
-    apiKey:            "AIzaSyCZ2m6sNh_DDgMD18QUCAp1Xqk74pb7cx8",
-    authDomain:        "fpc-backend.firebaseapp.com",
-    projectId:         "fpc-backend",
-    storageBucket:     "fpc-backend.firebasestorage.app",
-    messagingSenderId: "1043319296898",
-    appId:             "1:1043319296898:web:868c89be154e46a1d6359b",
-    measurementId:     "",
-  };
+  const firebaseConfig = window.FIREBASE_CONFIG;
 
   if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
   // Sign in anonymously so all Firestore requests carry a valid auth token
@@ -3356,7 +3349,7 @@ async function doLogin() {
   // the loader stuck forever. Wrap it so a missing push-notifications script
   // degrades gracefully instead of breaking login.
   try {
-    SMA_Push.init('teacher', { id: result.user.id || result.user.username, name: (result.user.firstName||'') + ' ' + (result.user.lastName||''), apiKey: 'AIzaSyCZ2m6sNh_DDgMD18QUCAp1Xqk74pb7cx8' });
+    SMA_Push.init('teacher', { id: result.user.id || result.user.username, name: (result.user.firstName||'') + ' ' + (result.user.lastName||''), apiKey: window.FIREBASE_CONFIG.apiKey });
   } catch(e) { console.warn('SMA_Push.init failed (non-fatal):', e); }
 
   /* ── Presence: mark teacher as online ── */

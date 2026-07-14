@@ -11,6 +11,7 @@
  * Firebase SDK v12 is loaded via CDN (compat / global build).
  * Add these two scripts BEFORE this file in every portal's <head>:
  *
+ *   <script src="firebase-config.js"></script>
  *   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
  *   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
  *   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -25,15 +26,7 @@
 window.SMA = (() => {
 
   /* ═══════════ FIREBASE INIT ═══════════ */
-  const firebaseConfig = {
-    apiKey:            "AIzaSyCZ2m6sNh_DDgMD18QUCAp1Xqk74pb7cx8",
-    authDomain:        "fpc-backend.firebaseapp.com",
-    projectId:         "fpc-backend",
-    storageBucket:     "fpc-backend.firebasestorage.app",
-    messagingSenderId: "1043319296898",
-    appId:             "1:1043319296898:web:868c89be154e46a1d6359b",
-    measurementId:     "",
-  };
+  const firebaseConfig = window.FIREBASE_CONFIG;
 
   if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();

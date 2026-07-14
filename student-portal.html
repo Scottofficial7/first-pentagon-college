@@ -1996,7 +1996,7 @@ async function doLogin() {
   // thinking the account is still loading.
   trySendChessInit();
   try {
-    SMA_Push.init('student', { id: currentStudentData.id, name: (currentStudentData.firstName||'') + ' ' + (currentStudentData.lastName||''), class: currentStudentData.class, apiKey: 'AIzaSyCZ2m6sNh_DDgMD18QUCAp1Xqk74pb7cx8' });
+    SMA_Push.init('student', { id: currentStudentData.id, name: (currentStudentData.firstName||'') + ' ' + (currentStudentData.lastName||''), class: currentStudentData.class, apiKey: window.FIREBASE_CONFIG.apiKey });
   } catch(e) { console.warn('SMA_Push.init failed (non-fatal):', e); }
   profileData  = await SMA.getProfile(currentStudentData.id) || {};
   profileAvatar = await SMA.getAvatar(currentStudentData.id) || null;
@@ -4534,6 +4534,7 @@ document.addEventListener('keydown', e => {
 </script>
 
 <!-- Firebase + F.P.C backend inlined for reliable loading -->
+<script src="firebase-config.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -4541,15 +4542,7 @@ document.addEventListener('keydown', e => {
 window.SMA = (() => {
 
   /* ═══════════ FIREBASE INIT ═══════════ */
-  const firebaseConfig = {
-    apiKey:            "AIzaSyCZ2m6sNh_DDgMD18QUCAp1Xqk74pb7cx8",
-    authDomain:        "fpc-backend.firebaseapp.com",
-    projectId:         "fpc-backend",
-    storageBucket:     "fpc-backend.firebasestorage.app",
-    messagingSenderId: "1043319296898",
-    appId:             "1:1043319296898:web:868c89be154e46a1d6359b",
-    measurementId:     "",
-  };
+  const firebaseConfig = window.FIREBASE_CONFIG;
 
   if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
   // Sign in anonymously so all Firestore requests carry a valid auth token

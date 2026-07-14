@@ -1,0 +1,5 @@
+# Generated at deploy time from Vercel Environment Variables — see scripts/build-config.js
+firebase-config.js
+
+node_modules/
+.vercel
