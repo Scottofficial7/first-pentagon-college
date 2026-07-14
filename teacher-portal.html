@@ -1389,11 +1389,13 @@ window.SMA = (() => {
           ...r,
           behaviouralRatings: { ...(r.behaviouralRatings || {}), ...(rec.behaviouralRatings || {}) },
           psychomotorRatings: { ...(r.psychomotorRatings || {}), ...(rec.psychomotorRatings || {}) },
+          ...(rec.teacherComment !== undefined ? { teacherComment: rec.teacherComment } : {}),
         } : r);
       } else {
         records = [{
           behaviouralRatings: rec.behaviouralRatings || {},
           psychomotorRatings: rec.psychomotorRatings || {},
+          teacherComment: rec.teacherComment || '',
           studentName: rec.studentName,
           class: rec.class,
           teacher: rec.teacher,
@@ -2706,15 +2708,12 @@ window.SMA = (() => {
       </div>
 
       <!-- Teacher Comment -->
-      <div style="margin-top:1rem;display:grid;grid-template-columns:1fr 1fr;gap:1rem">
-        <div class="form-group" style="margin-bottom:0">
-          <label class="form-label">Class Teacher's Comment</label>
-          <textarea class="form-control" id="gradeTeacherComment" style="min-height:70px" placeholder="e.g. A hardworking class with great potential…"></textarea>
-        </div>
+      <div style="margin-top:1rem">
         <div class="form-group" style="margin-bottom:0">
           <label class="form-label">Proprietress / Principal's Comment</label>
           <textarea class="form-control" id="gradeProprietressComment" style="min-height:70px" placeholder="e.g. Keep up the excellent work…"></textarea>
         </div>
+        <div style="font-size:.75rem;color:var(--muted);margin-top:.4rem">💡 Class Teacher's Comments are now entered per child in <strong>🧠 Domains</strong>, so each student gets their own personalised remark instead of one comment for the whole subject sheet.</div>
       </div>
       <div style="margin-top:.75rem">
         <label class="form-label">Class Teacher's Name</label>
@@ -5643,17 +5642,13 @@ async function renderExamResultsTab() {
             </div>
 
             <!-- Comments section -->
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.5rem">
-              <div style="background:var(--bg);border-radius:8px;padding:.75rem">
-                <div style="font-size:.72rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.3rem">Class Teacher's Comment</div>
-                <div style="font-size:.82rem;color:var(--text);font-style:italic">${r.teacherComment || '<span style="color:var(--muted)">No comment added.</span>'}</div>
-                <div style="font-size:.75rem;font-weight:600;color:var(--muted);margin-top:.4rem;border-top:1px solid var(--border);padding-top:.35rem">Signed: ${r.teacherName || currentTeacher.name}</div>
-              </div>
+            <div style="display:grid;grid-template-columns:1fr;gap:.75rem;margin-bottom:.5rem">
               <div style="background:var(--bg);border-radius:8px;padding:.75rem">
                 <div style="font-size:.72rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.3rem">Proprietress / Principal's Comment</div>
                 <div style="font-size:.82rem;color:var(--text);font-style:italic">${r.proprietressComment || '<span style="color:var(--muted)">No comment added.</span>'}</div>
                 <div style="font-size:.75rem;font-weight:600;color:var(--muted);margin-top:.4rem;border-top:1px solid var(--border);padding-top:.35rem">Signed: _______________________</div>
               </div>
+              <div style="font-size:.75rem;color:var(--muted);font-style:italic">Class Teacher's Comment is now set per child in the 🧠 Domains editor.</div>
             </div>
           </div>
 
@@ -5767,7 +5762,6 @@ async function editResult(id){
     });
   }
 
-  document.getElementById('gradeTeacherComment').value = r.teacherComment || '';
   document.getElementById('gradeTeacherName').value = r.teacherName || '';
   document.getElementById('gradeProprietressComment').value = r.proprietressComment || '';
 }
@@ -6039,7 +6033,6 @@ async function saveGrades() {
     savedResult = {
       ...existing,
       class:cls, subject, term, type, scores,
-      teacherComment: document.getElementById('gradeTeacherComment').value.trim(),
       teacherName: document.getElementById('gradeTeacherName').value.trim() || currentTeacher.name,
       proprietressComment: document.getElementById('gradeProprietressComment').value.trim()
     };
@@ -6053,7 +6046,6 @@ async function saveGrades() {
         await db.collection('teacher_result_submissions').doc(String(existing.id)).update({
           scores: scores.map(entry => ({ ...entry })),
           class: cls, subject, term, type,
-          teacherComment: savedResult.teacherComment,
           teacherName: savedResult.teacherName,
           proprietressComment: savedResult.proprietressComment,
           editedAt: new Date().toISOString(),
@@ -6081,7 +6073,6 @@ async function saveGrades() {
     date: new Date().toISOString().split('T')[0],
     status:'draft', teacher:currentTeacher.username,
     refNo, notes:'', scores,
-    teacherComment: document.getElementById('gradeTeacherComment').value.trim(),
     teacherName: document.getElementById('gradeTeacherName').value.trim() || currentTeacher.name,
     proprietressComment: document.getElementById('gradeProprietressComment').value.trim()
   };
@@ -9655,6 +9646,12 @@ document.addEventListener('keydown', e => {
         </div>
         <div id="domainPendingBanner" style="display:none;margin-bottom:1.2rem"></div>
 
+        <!-- Class Teacher's Comment (per child) -->
+        <div class="form-group">
+          <label class="form-label">Class Teacher's Comment</label>
+          <textarea class="form-control" id="domainTeacherComment" style="min-height:70px" placeholder="e.g. A hardworking pupil with great potential…"></textarea>
+        </div>
+
         <!-- Affective Domain -->
         <div style="font-family:'Sora',sans-serif;font-size:.82rem;font-weight:700;color:#fff;background:var(--navy);padding:.5rem 1rem;border-radius:8px;margin-bottom:.6rem;letter-spacing:.5px;text-transform:uppercase">
           Affective Domain — Behavioural Traits
@@ -9739,6 +9736,7 @@ function openDomainEditorModal() {
   document.getElementById('domainNoStudentMsg').style.display = 'block';
   document.getElementById('domainSaveBtn').style.display = 'none';
   document.getElementById('domainSaveStatus').style.display = 'none';
+  document.getElementById('domainTeacherComment').value = '';
   _domainCurrentStudentId = null;
   _domainCurrentStudentName = null;
   _domainSelections = { behavioural: {}, psychomotor: {} };
@@ -9817,6 +9815,7 @@ async function loadDomainRatings() {
   // Load existing ratings from Firestore — try per-student collection first, fall back to legacy.
   let existingBehavioural = {};
   let existingPsychomotor = {};
+  let existingComment = '';
   if (_domainCurrentStudentId) {
     try {
       const perStudent = await firebase.firestore().collection('results').doc(_domainCurrentStudentId).get();
@@ -9825,6 +9824,7 @@ async function loadDomainRatings() {
         if (records.length) {
           existingBehavioural = records[0].behaviouralRatings || {};
           existingPsychomotor = records[0].psychomotorRatings || {};
+          existingComment = records[0].teacherComment || '';
         }
       } else {
         const snap = await firebase.firestore().collection('config').doc('results').get();
@@ -9833,10 +9833,13 @@ async function loadDomainRatings() {
         if (records.length) {
           existingBehavioural = records[0].behaviouralRatings || {};
           existingPsychomotor = records[0].psychomotorRatings || {};
+          existingComment = records[0].teacherComment || '';
         }
       }
     } catch(e) { console.error('loadDomainRatings error:', e); }
   }
+
+  document.getElementById('domainTeacherComment').value = existingComment;
 
   // Seed JS state with loaded values so saves don't erase existing ratings.
   _domainSelections = {
@@ -9950,6 +9953,8 @@ async function saveDomainRatings() {
     // Domain ratings no longer write straight to the report card. Instead they
     // go to the admin as a Pending approval request; the ratings only appear
     // on the student's report card once an admin approves the request.
+    const teacherComment = document.getElementById('domainTeacherComment').value.trim();
+
     await SMA.submitDomainApproval({
       studentId: _domainCurrentStudentId,
       studentName: _domainCurrentStudentName,
@@ -9957,6 +9962,7 @@ async function saveDomainRatings() {
       teacher: currentTeacher.username,
       behaviouralRatings: bRatings,
       psychomotorRatings: pRatings,
+      teacherComment: teacherComment,
     });
 
     statusDiv.style.display = 'block';

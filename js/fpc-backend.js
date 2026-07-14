@@ -408,11 +408,13 @@ window.SMA = (() => {
           ...r,
           behaviouralRatings: { ...(r.behaviouralRatings || {}), ...(rec.behaviouralRatings || {}) },
           psychomotorRatings: { ...(r.psychomotorRatings || {}), ...(rec.psychomotorRatings || {}) },
+          ...(rec.teacherComment !== undefined ? { teacherComment: rec.teacherComment } : {}),
         } : r);
       } else {
         records = [{
           behaviouralRatings: rec.behaviouralRatings || {},
           psychomotorRatings: rec.psychomotorRatings || {},
+          teacherComment: rec.teacherComment || '',
           studentName: rec.studentName,
           class: rec.class,
           teacher: rec.teacher,
@@ -460,6 +462,9 @@ window.SMA = (() => {
               const psy = { ...copy.psychomotorRatings };
               Object.keys(rec.psychomotorRatings || {}).forEach(k => delete psy[k]);
               copy.psychomotorRatings = psy;
+            }
+            if (rec.teacherComment !== undefined && copy.teacherComment === rec.teacherComment) {
+              delete copy.teacherComment;
             }
             return copy;
           });

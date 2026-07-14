@@ -5882,6 +5882,7 @@ async function renderDomainApprovals() {
         </div>
       </div>
       <div style="padding:.85rem 1rem 1rem;border-top:1px solid var(--border)">
+        ${item.teacherComment ? `<div style="margin-bottom:.75rem;background:var(--bg);border-radius:8px;padding:.65rem .9rem"><div style="font-size:.72rem;font-weight:800;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.25rem">Class Teacher's Comment</div><div style="font-size:.82rem;font-style:italic;color:var(--text)">${item.teacherComment}</div></div>` : ''}
         ${_domainRatingsTable('Affective Domain — Behavioural Traits', item.behaviouralRatings, 'var(--navy)')}
         ${_domainRatingsTable('Psychomotor Domain — Skills', item.psychomotorRatings, '#6d28d9')}
         ${item.adminComment ? `<div style="font-size:.78rem;color:var(--danger-text);margin-top:.4rem"><strong>Admin note:</strong> ${item.adminComment}</div>` : ''}
@@ -9327,11 +9328,13 @@ window.SMA = (() => {
           ...r,
           behaviouralRatings: { ...(r.behaviouralRatings || {}), ...(rec.behaviouralRatings || {}) },
           psychomotorRatings: { ...(r.psychomotorRatings || {}), ...(rec.psychomotorRatings || {}) },
+          ...(rec.teacherComment !== undefined ? { teacherComment: rec.teacherComment } : {}),
         } : r);
       } else {
         records = [{
           behaviouralRatings: rec.behaviouralRatings || {},
           psychomotorRatings: rec.psychomotorRatings || {},
+          teacherComment: rec.teacherComment || '',
           studentName: rec.studentName,
           class: rec.class,
           teacher: rec.teacher,
@@ -9379,6 +9382,9 @@ window.SMA = (() => {
               const psy = { ...copy.psychomotorRatings };
               Object.keys(rec.psychomotorRatings || {}).forEach(k => delete psy[k]);
               copy.psychomotorRatings = psy;
+            }
+            if (rec.teacherComment !== undefined && copy.teacherComment === rec.teacherComment) {
+              delete copy.teacherComment;
             }
             return copy;
           });
