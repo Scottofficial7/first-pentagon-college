@@ -3510,6 +3510,14 @@ function buildNav() {
     <button class="nav-item" onclick="showTab('notifications',this)"><span class="nav-icon">🔔</span>Notifications<span class="nav-badge" id="navNotifBadge">2</span></button>
     <button class="nav-item" onclick="showTab('profile',this)"><span class="nav-icon">👤</span>My Profile</button>
   `;
+  // Secondary (subject) teachers are per-subject by default and only get the
+  // "My Subjects" overview. But if the admin has marked this teacher as the
+  // Class Teacher for one specific class (t.classTeacherOf), they also act as
+  // that class's homeroom teacher — so we fold in a "My Students" item, just
+  // like a primary/nursery class teacher gets, scoped to that one class.
+  const secondaryStudentsNavItem = currentTeacher.classTeacherOf
+    ? `<button class="nav-item" onclick="showTab('students',this)"><span class="nav-icon">👥</span>My Students</button>\n    `
+    : '';
   const secondaryNav = `
     <div class="nav-section-label">Main</div>
     <button class="nav-item active" onclick="showTab('dashboard',this)"><span class="nav-icon">🏠</span>Dashboard</button>
@@ -3518,7 +3526,7 @@ function buildNav() {
     <button class="nav-item" onclick="showTab('my-content',this)"><span class="nav-icon">📋</span>My Uploads</button>
     <button class="nav-item" onclick="showTab('lesson-plans',this)"><span class="nav-icon">📚</span>Lesson Plans<span class="nav-badge gold" id="navLPBadge">2</span></button>
     <div class="nav-section-label">Classes</div>
-    <button class="nav-item" onclick="showTab('grades',this)"><span class="nav-icon">📊</span>Grades & Assessment</button>
+    ${secondaryStudentsNavItem}<button class="nav-item" onclick="showTab('grades',this)"><span class="nav-icon">📊</span>Grades & Assessment</button>
     <button class="nav-item" onclick="showTab('exam-results',this)"><span class="nav-icon">📋</span>Exam Results<span class="nav-badge gold" id="navResultsBadge"></span></button>
     <button class="nav-item" onclick="showTab('online-exam',this);initExamTab()"><span class="nav-icon">🖥️</span>Online Exams</button>
     <button class="nav-item" onclick="showTab('timetable',this)"><span class="nav-icon">📅</span>My Timetable</button>
@@ -5175,13 +5183,17 @@ async function renderStudents() {
   }
 
   let html = '';
-  // Secondary teachers see every JSS1–SSS3 class (so students in any secondary
-  // class they might teach are recognized here), since a subject teacher's
-  // real workload can span classes beyond their explicit assignment. Every
-  // other teacher type sees only the classes actually assigned to them — an
-  // unassigned teacher sees an empty state asking them to contact the
-  // administrator (handled below).
-  const classesToShow = getTeachingClasses(t);
+  // Secondary (subject) teachers normally have no roster here at all — their
+  // "My Students" nav item only appears (see buildNav) when the admin has
+  // marked them as the Class Teacher for one specific class, and in that case
+  // this view is scoped strictly to that one class rather than every
+  // JSS1–SSS3 class they might teach a subject in. Every other teacher type
+  // sees only the classes actually assigned to them — an unassigned teacher
+  // sees an empty state asking them to contact the administrator (handled
+  // below).
+  const classesToShow = t.type === 'secondary'
+    ? (t.classTeacherOf ? [t.classTeacherOf] : [])
+    : getTeachingClasses(t);
 
   classesToShow.forEach(cls => {
     const students = STUDENTS[cls] || [];
@@ -9077,7 +9089,14 @@ function openPrimaryAddStudentModal(preselectedClass) {
   const existingModal = document.getElementById('primaryAddStudentModal');
   if (existingModal) existingModal.remove();
 
-  const sectionClasses = getScopedClasses(currentTeacher);
+  // Secondary (subject) teachers may be assigned several subject classes, but
+  // if they're only a Class Teacher for one of them (t.classTeacherOf), the
+  // Add Student action must stay scoped to that one homeroom class — not
+  // every class they merely teach a subject in. Primary/Nursery/Pre-Nursery
+  // class teachers keep their normal full scoped-class list.
+  const sectionClasses = currentTeacher.type === 'secondary'
+    ? (currentTeacher.classTeacherOf ? [currentTeacher.classTeacherOf] : [])
+    : getScopedClasses(currentTeacher);
   if (!sectionClasses.length) {
     showToast('⚠️ No class assigned to your account yet — contact your administrator.', 'error');
     return;
@@ -10412,9 +10431,9 @@ async function declineDeleteRequest(docId, studentId, itemType) {
   }
 }
 
-/* ══ SESSION RESTORE — re-hydrate on page refresh ══
+ ══ SESSION RESTORE — re-hydrate on page refresh ══
    Runs after SMA is defined. Restores the last logged-in teacher from
-   sessionStorage so a page refresh doesn't force a full re-login.        */
+   sessionStorage so a page refresh doesn't force a full re-login.        
 (async function restoreSession() {
   const raw = sessionStorage.getItem('sma_teacher');
   if (!raw) return;
